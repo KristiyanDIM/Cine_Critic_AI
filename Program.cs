@@ -1,4 +1,5 @@
 using Cine_Critic_AI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CineCritic_AI
 {
@@ -20,7 +21,7 @@ namespace CineCritic_AI
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
-           
+          
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
