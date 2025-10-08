@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cine_Critic_AI.Controllers
 {
-    public class AccountController : Controller
+    public class AccountControllerRegister : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public AccountController(ApplicationDbContext context)
+        public AccountControllerRegister(ApplicationDbContext context)
         {
             _context = context;
         }
