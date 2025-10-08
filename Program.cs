@@ -17,6 +17,7 @@ namespace CineCritic_AI
             }
             //iecwuebcwcb
             //epfhoiehfoiuhf
+            //utrtfdt
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
