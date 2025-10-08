@@ -25,5 +25,6 @@ namespace Cine_Critic_AI.Models
         [Compare("Password", ErrorMessage = "Паролите не съвпадат.")]
         [Display(Name = "Потвърди паролата")]
         public string ConfirmPassword { get; set; }
+        
     }
 }
