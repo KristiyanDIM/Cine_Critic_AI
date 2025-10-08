@@ -4,12 +4,12 @@ using Cine_Critic_AI.Models;
 
 namespace Cine_Critic_AI.Controllers
 {
-    public class AccountController : Controller
+    public class AccountControllerLogin : Controller
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
 
-        public AccountController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager)
+        public AccountControllerLogin(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager)
         {
             _signInManager = signInManager;
             _userManager = userManager;
