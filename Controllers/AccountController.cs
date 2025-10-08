@@ -1,22 +1,27 @@
-﻿using Acr.UserDialogs;
-using Cine_Critic_AI.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Cine_Critic_AI.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Cine_Critic_AI.Controllers
 {
-    public class AccountControllerRegister : Controller
+    public class AccountController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly PasswordHasher<User> _passwordHasher;
 
-        public AccountControllerRegister(ApplicationDbContext context)
+        public AccountController(ApplicationDbContext context)
         {
             _context = context;
+            _passwordHasher = new PasswordHasher<User>();
         }
 
         // GET: /Account/Login
         [HttpGet]
-        public IActionResult Login() => View();
+        public IActionResult Login()
+        {
+            return View();
+        }
 
         // POST: /Account/Login
         [HttpPost]
@@ -26,12 +31,17 @@ namespace Cine_Critic_AI.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var user = await _context.Set<User>()
-                .FirstOrDefaultAsync(u => u.Username == model.Username && u.Password == model.Password);
-
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "Невалидно потребителско име или парола.");
+                ModelState.AddModelError("", "Невалидно потребителско име или парола.");
+                return View(model);
+            }
+
+            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
+            if (result == PasswordVerificationResult.Failed)
+            {
+                ModelState.AddModelError("", "Невалидно потребителско име или парола.");
                 return View(model);
             }
 
@@ -41,7 +51,10 @@ namespace Cine_Critic_AI.Controllers
 
         // GET: /Account/Register
         [HttpGet]
-        public IActionResult Register() => View();
+        public IActionResult Register()
+        {
+            return View();
+        }
 
         // POST: /Account/Register
         [HttpPost]
@@ -51,29 +64,29 @@ namespace Cine_Critic_AI.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            // Проверка дали потребителското име или имейл вече съществува
-            if (await _context.Set<User>().AnyAsync(u => u.Username == model.Username))
+            if (await _context.Users.AnyAsync(u => u.Username == model.Username))
             {
                 ModelState.AddModelError("Username", "Това потребителско име вече съществува.");
                 return View(model);
             }
 
-            if (await _context.Set<User>().AnyAsync(u => u.Email == model.Email))
+            if (await _context.Users.AnyAsync(u => u.Email == model.Email))
             {
                 ModelState.AddModelError("Email", "Този имейл вече е регистриран.");
                 return View(model);
             }
 
-            // Създай нов потребител
             var user = new User
             {
                 Username = model.Username,
                 Email = model.Email,
-                Password = model.Password, // ⚠️ В реален проект трябва да се криптира
                 RegisteredOn = DateTime.Now
             };
 
-            _context.Set<User>().Add(user);
+            // Хеширане на паролата
+            user.Password = _passwordHasher.HashPassword(user, model.Password);
+
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Регистрацията е успешна! Влез в профила си.";
