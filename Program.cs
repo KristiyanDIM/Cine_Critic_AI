@@ -15,9 +15,7 @@ namespace CineCritic_AI
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
-            //iecwuebcwcb
-            //epfhoiehfoiuhf
-            //utrtfdt
+           
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
