@@ -11,5 +11,6 @@ namespace Cine_Critic_AI.Models
         }
 
         public DbSet<Movie> Movies { get; set; }
+        public object Users { get; internal set; }
     }
 }
