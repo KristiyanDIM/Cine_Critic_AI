@@ -28,7 +28,7 @@ namespace Cine_Critic_AI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return View(model);
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
@@ -61,7 +61,7 @@ namespace Cine_Critic_AI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return View(model);
 
             if (await _context.Users.AnyAsync(u => u.Username == model.Username))
