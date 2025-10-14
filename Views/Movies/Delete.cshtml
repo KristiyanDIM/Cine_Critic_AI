@@ -1,0 +1,28 @@
+﻿@model Cine_Critic_AI.Models.Movie
+
+@{
+    ViewData["Title"] = "Изтриване на филм";
+}
+
+<h2 class="text-danger">@ViewData["Title"]</h2>
+
+<h4>Сигурни ли сте, че искате да изтриете "<strong>@Model.Title</strong>"?</h4>
+
+<div class="mt-4">
+    <dl class="row">
+        <dt class="col-sm-2">Година</dt>
+        <dd class="col-sm-10">@Model.Year</dd>
+
+        <dt class="col-sm-2">Жанр</dt>
+        <dd class="col-sm-10">@Model.Genre</dd>
+
+        <dt class="col-sm-2">Режисьор</dt>
+        <dd class="col-sm-10">@Model.Director</dd>
+    </dl>
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">🗑️ Изтрий</button>
+    <a asp-action="Index" class="btn btn-secondary">⬅️ Отказ</a>
+</form>
