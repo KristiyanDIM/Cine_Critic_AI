@@ -1,0 +1,21 @@
+﻿@model Cine_Critic_AI.Models.Review
+
+@{
+    ViewData["Title"] = "Детайли за ревю";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="card mt-3 shadow-sm">
+    <div class="card-body">
+        <p><strong>Оценка:</strong> @Model.Rate</p>
+        <p><strong>Коментар:</strong> @Model.Comment</p>
+        <p><strong>Емоционален тон:</strong> @Model.EmotionTone</p>
+        <p><strong>Дата:</strong> @Model.Date.ToString("dd.MM.yyyy")</p>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">✏️ Редактирай</a>
+    <a asp-action="Index" class="btn btn-secondary">⬅️ Назад</a>
+</div>

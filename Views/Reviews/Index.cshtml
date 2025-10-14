@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Cine_Critic_AI.Models.Review>
+
+@{
+    ViewData["Title"] = "Ревюта";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">➕ Добави ново ревю</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Оценка</th>
+            <th>Коментар</th>
+            <th>Емоционален тон</th>
+            <th>Дата</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var review in Model)
+        {
+            <tr>
+                <td>@review.Rate</td>
+                <td>@review.Comment</td>
+                <td>@review.EmotionTone</td>
+                <td>@review.Date.ToString("dd.MM.yyyy")</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@review.Id" class="btn btn-info btn-sm">Детайли</a> |
+                    <a asp-action="Edit" asp-route-id="@review.Id" class="btn btn-warning btn-sm">Редактирай</a> |
+                    <a asp-action="Delete" asp-route-id="@review.Id" class="btn btn-danger btn-sm">Изтрий</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
