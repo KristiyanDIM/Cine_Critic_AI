@@ -32,9 +32,18 @@
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h5 class="card-title text-info">👤 Потребители</h5>
-                    <p class="card-text">Регистрирай се и се присъедини към нашата филмова общност!</p>
-                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-info">Регистрация</a>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <h5 class="card-title text-info">👤 @User.Identity.Name</h5>
+                        <p class="card-text">Добре дошъл в нашата филмова общност!</p>
+                        <a asp-controller="Account" asp-action="Logout" class="btn btn-outline-info">Изход</a>
+                    }
+                    else
+                    {
+                        <h5 class="card-title text-info">👤 Потребители</h5>
+                        <p class="card-text">Регистрирай се и се присъедини към нашата филмова общност!</p>
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-info">Регистрация</a>
+                    }
                 </div>
             </div>
         </div>
