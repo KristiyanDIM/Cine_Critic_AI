@@ -11,13 +11,13 @@
 
     <div class="mb-3">
         <label asp-for="NewPassword" class="form-label"></label>
-        <input asp-for="NewPassword" class="form-control" />
+        <input asp-for="NewPassword" class="form-control" data-val="false" />
         <span asp-validation-for="NewPassword" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="ConfirmPassword" class="form-label"></label>
-        <input asp-for="ConfirmPassword" class="form-control" />
+        <input asp-for="ConfirmPassword" class="form-control" data-val="false" />
         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
     </div>
 
