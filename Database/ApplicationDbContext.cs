@@ -10,7 +10,8 @@ namespace Cine_Critic_AI.Models
         {
         }
 
+        public DbSet<User> Users { get; set; }
         public DbSet<Movie> Movies { get; set; }
-        public DbSet<User> Users { get; set; }   
+          
     }
 }
