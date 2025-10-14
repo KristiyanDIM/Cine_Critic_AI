@@ -1,6 +1,7 @@
 ﻿using Cine_Critic_AI.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -68,7 +69,70 @@ namespace Cine_Critic_AI.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpGet]
+
+      
+
+[Authorize]
+    [HttpGet]
+    public async Task<IActionResult> EditProfile()
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
+        if (user == null)
+            return NotFound();
+
+        var model = new EditProfileViewModel
+        {
+            Username = user.Username
+        };
+
+        return View(model);
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
+        if (user == null)
+            return NotFound();
+
+            if (!string.IsNullOrEmpty(model.Username) && user.Username != model.Username)
+            {
+                // проверка за уникалност
+                user.Username = model.Username;
+            }
+
+            if (!string.IsNullOrEmpty(model.NewPassword))
+            {
+                user.Password = _passwordHasher.HashPassword(user, model.NewPassword);
+            }
+
+
+            _context.Update(user);
+        await _context.SaveChangesAsync();
+
+        // Преавтентикация с новото име
+        var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, user.Username),
+        new Claim(ClaimTypes.Email, user.Email)
+    };
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(claimsIdentity));
+
+        TempData["Success"] = "Профилът е успешно обновен!";
+        return RedirectToAction("Index", "Home");
+    }
+
+
+
+
+    [HttpGet]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
