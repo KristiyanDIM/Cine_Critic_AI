@@ -1,0 +1,21 @@
+﻿@model IReadOnlyList<string>
+
+@{
+    ViewData["Title"] = "Логове на приложението";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (Model.Any())
+{
+    <ul class="list-group">
+        @foreach (var log in Model)
+        {
+            <li class="list-group-item">@log</li>
+        }
+    </ul>
+}
+else
+{
+    <p>Все още няма записани логове.</p>
+}

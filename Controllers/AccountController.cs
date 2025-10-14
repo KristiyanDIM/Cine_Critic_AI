@@ -1,4 +1,5 @@
 ﻿using Cine_Critic_AI.Models;
+using Cine_Critic_AI.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -13,155 +14,117 @@ namespace Cine_Critic_AI.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly PasswordHasher<User> _passwordHasher;
+        private readonly AppLoggerSingleton _appLogger;
 
-        public AccountController(ApplicationDbContext context)
+        public AccountController(ApplicationDbContext context, AppLoggerSingleton appLogger)
         {
             _context = context;
             _passwordHasher = new PasswordHasher<User>();
+            _appLogger = appLogger;
         }
 
         // GET: /Account/Login
         [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
+        public IActionResult Login() => View();
 
         // POST: /Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            if (!ModelState.IsValid) return View(model);
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
-            if (user == null)
+            if (user == null || _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password) == PasswordVerificationResult.Failed)
             {
                 ModelState.AddModelError("", "Невалидно потребителско име или парола.");
                 return View(model);
             }
 
-            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
-            if (result == PasswordVerificationResult.Failed)
-            {
-                ModelState.AddModelError("", "Невалидно потребителско име или парола.");
-                return View(model);
-            }
+            // Логваме успешен вход
+            _appLogger.Log($"Потребителят {user.Username} се логна успешно.");
 
-            // Създаваме claims за потребителя
             var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Name, user.Username),
-        new Claim(ClaimTypes.Email, user.Email)
-    };
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var authProperties = new AuthenticationProperties
             {
-                IsPersistent = true, // остава логнат след затваряне на браузъра
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email)
             };
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties { IsPersistent = true };
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                authProperties);
+                new ClaimsPrincipal(claimsIdentity), authProperties);
 
             return RedirectToAction("Index", "Home");
         }
 
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> EditProfile()
         {
-            var username = User.Identity.Name;
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
+            if (user == null) return NotFound();
 
-            if (user == null)
-                return NotFound();
-
-            var model = new EditProfileViewModel
-            {
-                Username = user.Username
-            };
-
-            return View(model);
+            return View(new EditProfileViewModel { Username = user.Username });
         }
 
-
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProfile(EditProfileViewModel model)
         {
-            var username = User.Identity.Name;
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
-            if (user == null)
-                return NotFound();
+            if (!ModelState.IsValid) return View(model);
 
-            if (!string.IsNullOrWhiteSpace(model.NewPassword))
-            {
-                if (model.NewPassword != model.ConfirmPassword)
-                {
-                    ModelState.AddModelError("ConfirmPassword", "Паролите не съвпадат.");
-                    return View(model);
-                }
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
+            if (user == null) return NotFound();
 
-                var hasher = new PasswordHasher<User>();
-                user.Password = hasher.HashPassword(user, model.NewPassword);
-            }
-
-            bool usernameChanged = false;
-
-            if (!string.IsNullOrWhiteSpace(model.Username) && model.Username != user.Username)
-            {
+            if (!string.IsNullOrEmpty(model.Username) && user.Username != model.Username)
                 user.Username = model.Username;
-                usernameChanged = true;
-            }
+
+            if (!string.IsNullOrEmpty(model.NewPassword))
+                user.Password = _passwordHasher.HashPassword(user, model.NewPassword);
 
             _context.Update(user);
             await _context.SaveChangesAsync();
 
-            // 🔄 Обновяване на cookie-а, ако името е сменено
-            if (usernameChanged)
+            // Логваме промяна на профил
+            _appLogger.Log($"Потребителят {user.Username} е обновил профила си.");
+
+            // Преавтентикация
+            var claims = new List<Claim>
             {
-                var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Email, user.Email)
-        };
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)));
 
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity));
-            }
-
-            TempData["Success"] = "Профилът е обновен успешно!";
+            TempData["Success"] = "Профилът е успешно обновен!";
             return RedirectToAction("Index", "Home");
         }
-
 
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
+            var username = User.Identity.Name;
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Логваме изход
+            _appLogger.Log($"Потребителят {username} се е излогнал.");
+
             return RedirectToAction("Index", "Home");
         }
 
-
         // GET: /Account/Register
         [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
+        public IActionResult Register() => View();
 
         // POST: /Account/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            if (!ModelState.IsValid) return View(model);
 
             if (await _context.Users.AnyAsync(u => u.Username == model.Username))
             {
@@ -179,14 +142,15 @@ namespace Cine_Critic_AI.Controllers
             {
                 Username = model.Username,
                 Email = model.Email,
-                RegisteredOn = DateTime.Now
+                RegisteredOn = DateTime.Now,
+                Password = _passwordHasher.HashPassword(null, model.Password)
             };
-
-            // Хеширане на паролата
-            user.Password = _passwordHasher.HashPassword(user, model.Password);
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+
+            // Логваме регистрация
+            _appLogger.Log($"Ново регистриран потребител: {user.Username}");
 
             TempData["Success"] = "Регистрацията е успешна! Влез в профила си.";
             return RedirectToAction("Login");

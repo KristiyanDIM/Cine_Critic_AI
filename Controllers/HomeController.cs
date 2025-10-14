@@ -1,23 +1,32 @@
-using System.Diagnostics;
+﻿using Cine_Critic_AI.Services;
 using CineCritic_AI.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace CineCritic_AI.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly AppLoggerSingleton _appLogger;
 
-        public HomeController(ILogger<HomeController> logger)
+
+        public HomeController(ILogger<HomeController> logger, AppLoggerSingleton appLogger)
         {
             _logger = logger;
+            _appLogger = appLogger;
         }
 
         public IActionResult Index()
         {
+            _appLogger.Log("Потребителят е посетил началната страница.");
             return View();
         }
-
+        public IActionResult Logs()
+        {
+            var logs = _appLogger.GetLogs(); // Вземаме всички записани логове
+            return View(logs); // Предаваме ги на View
+        }
         public IActionResult Privacy()
         {
             return View();
