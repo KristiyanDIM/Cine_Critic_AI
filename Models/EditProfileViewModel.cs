@@ -6,15 +6,14 @@ namespace Cine_Critic_AI.Models
     {
         [StringLength(50)]
         [Display(Name = "Потребителско име")]
-        public string Username { get; set; }  // НЕ е Required
+        public string Username { get; set; }
 
         [DataType(DataType.Password)]
         [Display(Name = "Нова парола")]
-        public string NewPassword { get; set; } // НЕ е Required
+        public string NewPassword { get; set; }
 
         [DataType(DataType.Password)]
-        [Compare("NewPassword", ErrorMessage = "Паролите не съвпадат.")]
         [Display(Name = "Потвърди новата парола")]
-        public string ConfirmPassword { get; set; } // НЕ е Required
+        public string ConfirmPassword { get; set; }
     }
 }

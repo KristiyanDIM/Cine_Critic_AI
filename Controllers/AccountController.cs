@@ -70,69 +70,77 @@ namespace Cine_Critic_AI.Controllers
         }
 
 
-      
-
-[Authorize]
-    [HttpGet]
-    public async Task<IActionResult> EditProfile()
-    {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
-        if (user == null)
-            return NotFound();
-
-        var model = new EditProfileViewModel
+        [HttpGet]
+        public async Task<IActionResult> EditProfile()
         {
-            Username = user.Username
-        };
+            var username = User.Identity.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
 
-        return View(model);
-    }
+            if (user == null)
+                return NotFound();
 
-    [Authorize]
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditProfile(EditProfileViewModel model)
-    {
-        if (!ModelState.IsValid)
+            var model = new EditProfileViewModel
+            {
+                Username = user.Username
+            };
+
             return View(model);
+        }
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
-        if (user == null)
-            return NotFound();
 
-            if (!string.IsNullOrEmpty(model.Username) && user.Username != model.Username)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+        {
+            var username = User.Identity.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null)
+                return NotFound();
+
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
             {
-                // проверка за уникалност
+                if (model.NewPassword != model.ConfirmPassword)
+                {
+                    ModelState.AddModelError("ConfirmPassword", "Паролите не съвпадат.");
+                    return View(model);
+                }
+
+                var hasher = new PasswordHasher<User>();
+                user.Password = hasher.HashPassword(user, model.NewPassword);
+            }
+
+            bool usernameChanged = false;
+
+            if (!string.IsNullOrWhiteSpace(model.Username) && model.Username != user.Username)
+            {
                 user.Username = model.Username;
+                usernameChanged = true;
             }
-
-            if (!string.IsNullOrEmpty(model.NewPassword))
-            {
-                user.Password = _passwordHasher.HashPassword(user, model.NewPassword);
-            }
-
 
             _context.Update(user);
-        await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
-        // Преавтентикация с новото име
-        var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Name, user.Username),
-        new Claim(ClaimTypes.Email, user.Email)
-    };
-        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(claimsIdentity));
+            // 🔄 Обновяване на cookie-а, ако името е сменено
+            if (usernameChanged)
+            {
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Email, user.Email)
+        };
 
-        TempData["Success"] = "Профилът е успешно обновен!";
-        return RedirectToAction("Index", "Home");
-    }
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity));
+            }
+
+            TempData["Success"] = "Профилът е обновен успешно!";
+            return RedirectToAction("Index", "Home");
+        }
 
 
-
-
-    [HttpGet]
+        [HttpGet]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
