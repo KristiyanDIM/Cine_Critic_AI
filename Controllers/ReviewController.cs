@@ -9,11 +9,14 @@ namespace Cine_Critic_AI.Controllers
     {
         private readonly DatabaseService _database;
         private readonly AppLoggerSingleton _appLogger;
+        private readonly LocalAIService _ai;
 
-        public ReviewsController(DatabaseService database, AppLoggerSingleton appLogger)
+        // Единен конструктор – съдържа всички зависимости
+        public ReviewsController(DatabaseService database, AppLoggerSingleton appLogger, LocalAIService ai)
         {
             _database = database;
             _appLogger = appLogger;
+            _ai = ai;
         }
 
         // GET: Reviews
@@ -118,6 +121,15 @@ namespace Cine_Critic_AI.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // AI функционалност
+        [HttpPost]
+        public async Task<IActionResult> Generate(string title, string description)
+        {
+            var review = await _ai.GenerateReviewAsync(title, description);
+            ViewBag.GeneratedReview = review;
+            return View("Generated");
         }
     }
 }

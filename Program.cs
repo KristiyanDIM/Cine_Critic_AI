@@ -16,6 +16,7 @@ namespace CineCritic_AI
 
             // Регистрираме Logger Singleton
             builder.Services.AddSingleton(AppLoggerSingleton.Instance);
+            builder.Services.AddSingleton<LocalAIService>();
 
             // Authentication
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -25,7 +26,7 @@ namespace CineCritic_AI
                     options.LogoutPath = "/Account/Logout";
                     options.ExpireTimeSpan = TimeSpan.FromHours(1);
                 });
-
+           
             var app = builder.Build();
 
             if (!app.Environment.IsDevelopment())

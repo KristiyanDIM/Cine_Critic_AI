@@ -11,19 +11,19 @@
 
     <div class="form-group mb-3">
         <label asp-for="Rate" class="form-label"></label>
-        <input asp-for="Rate" class="form-control" placeholder="Оценка (1-5)" />
+        <input asp-for="Rate" class="form-control" placeholder="Оценка (1-5)" id="rateInput" />
         <span asp-validation-for="Rate" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
         <label asp-for="Comment" class="form-label"></label>
-        <textarea asp-for="Comment" class="form-control" placeholder="Напишете коментар"></textarea>
+        <textarea asp-for="Comment" class="form-control" placeholder="Напишете коментар" id="commentInput"></textarea>
         <span asp-validation-for="Comment" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
         <label asp-for="EmotionTone" class="form-label"></label>
-        <input asp-for="EmotionTone" class="form-control" placeholder="Емоционален тон (напр. позитивен)" />
+        <input asp-for="EmotionTone" class="form-control" placeholder="Емоционален тон (напр. позитивен, неутрален, негативен)" id="toneInput" />
         <span asp-validation-for="EmotionTone" class="text-danger"></span>
     </div>
 
@@ -34,9 +34,47 @@
     </div>
 
     <button type="submit" class="btn btn-success">💾 Запази</button>
-    <a asp-action="Index" class="btn btn-secondary">⬅️ Назад</a>
+    <button type="button" id="aiButton" class="btn btn-secondary ms-2">🤖 Генерирай с AI</button>
+    <a asp-action="Index" class="btn btn-outline-secondary ms-2">⬅️ Назад</a>
 </form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.getElementById("aiButton").addEventListener("click", async function () {
+            const rate = document.getElementById("rateInput").value;
+            const tone = document.getElementById("toneInput").value;
+
+            if (!rate) {
+                alert("Моля, въведи оценка (1–5), за да може AI да предложи подходящ коментар.");
+                return;
+            }
+
+            const description = tone ? `Тон: ${tone}` : "без определен тон";
+
+            try {
+                const response = await fetch('/Reviews/Generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `title=Филм с оценка ${rate}&description=${encodeURIComponent(description)}`
+                });
+
+                if (response.ok) {
+                    const html = await response.text();
+                    const tempDiv = document.createElement("div");
+                    tempDiv.innerHTML = html;
+
+                    // Извличаме AI текста от View-то "Generated"
+                    const generated = tempDiv.querySelector("p")?.textContent || "Неуспешно генериране на ревю.";
+
+                    document.getElementById("commentInput").value = generated;
+                } else {
+                    alert("❌ Грешка при свързване с AI услугата.");
+                }
+            } catch (error) {
+                alert("⚠️ Възникна грешка: " + error);
+            }
+        });
+    </script>
 }
