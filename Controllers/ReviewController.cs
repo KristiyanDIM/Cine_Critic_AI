@@ -1,31 +1,35 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Cine_Critic_AI.Models;
+using Cine_Critic_AI.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Cine_Critic_AI.Controllers
 {
     public class ReviewsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DatabaseService _database;
+        private readonly AppLoggerSingleton _appLogger;
 
-        public ReviewsController(ApplicationDbContext context)
+        public ReviewsController(DatabaseService database, AppLoggerSingleton appLogger)
         {
-            _context = context;
+            _database = database;
+            _appLogger = appLogger;
         }
 
         // GET: Reviews
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Reviews.ToListAsync());
+            var reviews = _database.GetAllReviews();
+            return View(reviews);
         }
 
         // GET: Reviews/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
                 return NotFound();
 
-            var review = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == id);
+            var review = _database.GetReviewById(id.Value);
             if (review == null)
                 return NotFound();
 
@@ -33,32 +37,35 @@ namespace Cine_Critic_AI.Controllers
         }
 
         // GET: Reviews/Create
+        [Authorize]
         public IActionResult Create()
         {
             return View();
         }
 
         // POST: Reviews/Create
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Review review)
+        public IActionResult Create(Review review)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(review);
-                await _context.SaveChangesAsync();
+                _database.InsertReview(review);
+                _appLogger.Log($"Потребителят създаде ново ревю (ID {review.Id}).");
                 return RedirectToAction(nameof(Index));
             }
             return View(review);
         }
 
         // GET: Reviews/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        [Authorize]
+        public IActionResult Edit(int? id)
         {
             if (id == null)
                 return NotFound();
 
-            var review = await _context.Reviews.FindAsync(id);
+            var review = _database.GetReviewById(id.Value);
             if (review == null)
                 return NotFound();
 
@@ -66,29 +73,31 @@ namespace Cine_Critic_AI.Controllers
         }
 
         // POST: Reviews/Edit/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Review review)
+        public IActionResult Edit(int id, Review review)
         {
             if (id != review.Id)
                 return NotFound();
 
             if (ModelState.IsValid)
             {
-                _context.Update(review);
-                await _context.SaveChangesAsync();
+                _database.UpdateReview(review);
+                _appLogger.Log($"Потребителят редактира ревюто (ID {review.Id}).");
                 return RedirectToAction(nameof(Index));
             }
             return View(review);
         }
 
         // GET: Reviews/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [Authorize]
+        public IActionResult Delete(int? id)
         {
             if (id == null)
                 return NotFound();
 
-            var review = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == id);
+            var review = _database.GetReviewById(id.Value);
             if (review == null)
                 return NotFound();
 
@@ -96,16 +105,18 @@ namespace Cine_Critic_AI.Controllers
         }
 
         // POST: Reviews/DeleteConfirmed/5
+        [Authorize]
         [HttpPost, ActionName("DeleteConfirmed")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var review = await _context.Reviews.FindAsync(id);
+            var review = _database.GetReviewById(id);
             if (review != null)
             {
-                _context.Reviews.Remove(review);
-                await _context.SaveChangesAsync();
+                _database.DeleteReview(id);
+                _appLogger.Log($"Потребителят изтри ревюто (ID {id}).");
             }
+
             return RedirectToAction(nameof(Index));
         }
     }

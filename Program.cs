@@ -1,8 +1,5 @@
-using Cine_Critic_AI.Models;
-using Cine_Critic_AI.Services;
+﻿using Cine_Critic_AI.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace CineCritic_AI
 {
@@ -14,18 +11,20 @@ namespace CineCritic_AI
 
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            // Регистрираме Singleton Database (DAO)
+            builder.Services.AddSingleton<DatabaseService>(DatabaseService.Instance);
 
+            // Регистрираме Logger Singleton
             builder.Services.AddSingleton(AppLoggerSingleton.Instance);
 
+            // Authentication
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-        options.ExpireTimeSpan = TimeSpan.FromHours(1);
-    });
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Logout";
+                    options.ExpireTimeSpan = TimeSpan.FromHours(1);
+                });
 
             var app = builder.Build();
 
@@ -34,12 +33,11 @@ namespace CineCritic_AI
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
-          
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

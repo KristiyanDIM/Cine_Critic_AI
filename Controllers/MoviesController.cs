@@ -1,24 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Cine_Critic_AI.Models;
 using Cine_Critic_AI.Services;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 
 namespace Cine_Critic_AI.Controllers
 {
     public class MoviesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DatabaseService _database;
         private readonly AppLoggerSingleton _appLogger;
 
-        public MoviesController(ApplicationDbContext context, AppLoggerSingleton appLogger)
+        public MoviesController(DatabaseService database, AppLoggerSingleton appLogger)
         {
-            _context = context;
+            _database = database;
             _appLogger = appLogger;
         }
 
-        // ✅ малък помощен метод за име на текущия потребител
         private string GetCurrentUser()
         {
             return User.Identity != null && User.Identity.IsAuthenticated
@@ -27,15 +24,15 @@ namespace Cine_Critic_AI.Controllers
         }
 
         // GET: Movies
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var movies = await _context.Movies.ToListAsync();
+            var movies = _database.GetAllMovies();
             _appLogger.Log($"{GetCurrentUser()} зареди списъка с филми.");
             return View(movies);
         }
 
         // GET: Movies/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
@@ -43,7 +40,7 @@ namespace Cine_Critic_AI.Controllers
                 return NotFound();
             }
 
-            var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == id);
+            var movie = _database.GetMovieById(id.Value);
             if (movie == null)
             {
                 _appLogger.Log($"{GetCurrentUser()} опита да достъпи несъществуващ филм (ID {id}).");
@@ -54,7 +51,6 @@ namespace Cine_Critic_AI.Controllers
             return View(movie);
         }
 
-        // GET: Movies/Create
         [Authorize]
         public IActionResult Create()
         {
@@ -62,26 +58,22 @@ namespace Cine_Critic_AI.Controllers
             return View();
         }
 
-        // POST: Movies/Create
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Year,Genre,Director,Description")] Movie movie)
+        public IActionResult Create(Movie movie)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(movie);
-                await _context.SaveChangesAsync();
-
+                _database.InsertMovie(movie);
                 _appLogger.Log($"{GetCurrentUser()} добави нов филм: {movie.Title} ({movie.Year})");
                 return RedirectToAction(nameof(Index));
             }
             return View(movie);
         }
 
-        // GET: Movies/Edit/5
         [Authorize]
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
@@ -89,7 +81,7 @@ namespace Cine_Critic_AI.Controllers
                 return NotFound();
             }
 
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = _database.GetMovieById(id.Value);
             if (movie == null)
             {
                 _appLogger.Log($"{GetCurrentUser()} опита да редактира несъществуващ филм (ID {id}).");
@@ -100,11 +92,10 @@ namespace Cine_Critic_AI.Controllers
             return View(movie);
         }
 
-        // POST: Movies/Edit/5
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Year,Genre,Director,Description")] Movie movie)
+        public IActionResult Edit(int id, Movie movie)
         {
             if (id != movie.Id)
             {
@@ -114,32 +105,15 @@ namespace Cine_Critic_AI.Controllers
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(movie);
-                    await _context.SaveChangesAsync();
-                    _appLogger.Log($"{GetCurrentUser()} редактира филма: {movie.Title}");
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!MovieExists(movie.Id))
-                    {
-                        _appLogger.Log($"{GetCurrentUser()} опита да редактира несъществуващ филм (ID {movie.Id}).");
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                _database.UpdateMovie(movie);
+                _appLogger.Log($"{GetCurrentUser()} редактира филма: {movie.Title}");
                 return RedirectToAction(nameof(Index));
             }
             return View(movie);
         }
 
-        // GET: Movies/Delete/5
         [Authorize]
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
@@ -147,7 +121,7 @@ namespace Cine_Critic_AI.Controllers
                 return NotFound();
             }
 
-            var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == id);
+            var movie = _database.GetMovieById(id.Value);
             if (movie == null)
             {
                 _appLogger.Log($"{GetCurrentUser()} опита да изтрие несъществуващ филм (ID {id}).");
@@ -158,17 +132,15 @@ namespace Cine_Critic_AI.Controllers
             return View(movie);
         }
 
-        // POST: Movies/Delete/5
         [Authorize]
         [HttpPost, ActionName("DeleteConfirmed")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = _database.GetMovieById(id);
             if (movie != null)
             {
-                _context.Movies.Remove(movie);
-                await _context.SaveChangesAsync();
+                _database.DeleteMovie(id);
                 _appLogger.Log($"{GetCurrentUser()} изтри филма: {movie.Title}");
             }
             else
@@ -178,7 +150,5 @@ namespace Cine_Critic_AI.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
-        private bool MovieExists(int id) => _context.Movies.Any(e => e.Id == id);
     }
 }

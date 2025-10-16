@@ -25,9 +25,6 @@ namespace Cine_Critic_AI.Models
 
         [Display(Name = "Дата на регистрация")]
         public DateTime RegisteredOn { get; set; } = DateTime.Now;
-
-        // Навигационно свойство — един потребител може да има много ревюта
-        public ICollection<Review> Reviews { get; set; }
     }
 }
 

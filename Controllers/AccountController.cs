@@ -5,43 +5,42 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Cine_Critic_AI.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DatabaseService _database; // Singleton DAO
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly AppLoggerSingleton _appLogger;
 
-        public AccountController(ApplicationDbContext context, AppLoggerSingleton appLogger)
+        public AccountController(DatabaseService database, AppLoggerSingleton appLogger)
         {
-            _context = context;
+            _database = database;
             _passwordHasher = new PasswordHasher<User>();
             _appLogger = appLogger;
         }
 
-        // GET: /Account/Login
         [HttpGet]
         public IActionResult Login() => View();
 
-        // POST: /Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public IActionResult Login(LoginViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
+            // Използваме DAO за достъп до потребители
+            var user = _database.GetAllUsers()
+                                .FirstOrDefault(u => u.Username == model.Username);
+
             if (user == null || _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password) == PasswordVerificationResult.Failed)
             {
                 ModelState.AddModelError("", "Невалидно потребителско име или парола.");
                 return View(model);
             }
 
-            // Логваме успешен вход
             _appLogger.Log($"Потребителят {user.Username} се логна успешно.");
 
             var claims = new List<Claim>
@@ -49,20 +48,22 @@ namespace Cine_Critic_AI.Controllers
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email)
             };
+
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var authProperties = new AuthenticationProperties { IsPersistent = true };
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity), authProperties);
+            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                                    new ClaimsPrincipal(claimsIdentity), authProperties).Wait();
 
             return RedirectToAction("Index", "Home");
         }
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> EditProfile()
+        public IActionResult EditProfile()
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
+            var user = _database.GetAllUsers()
+                                .FirstOrDefault(u => u.Username == User.Identity.Name);
             if (user == null) return NotFound();
 
             return View(new EditProfileViewModel { Username = user.Username });
@@ -71,11 +72,10 @@ namespace Cine_Critic_AI.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+        public IActionResult EditProfile(EditProfileViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
+            var user = _database.GetAllUsers()
+                                .FirstOrDefault(u => u.Username == User.Identity.Name);
             if (user == null) return NotFound();
 
             if (!string.IsNullOrEmpty(model.Username) && user.Username != model.Username)
@@ -84,55 +84,51 @@ namespace Cine_Critic_AI.Controllers
             if (!string.IsNullOrEmpty(model.NewPassword))
                 user.Password = _passwordHasher.HashPassword(user, model.NewPassword);
 
-            _context.Update(user);
-            await _context.SaveChangesAsync();
+            // Тук би трябвало да имаш метод в Database за UpdateUser
+            _database.UpdateUser(user);
 
-            // Логваме промяна на профил
             _appLogger.Log($"Потребителят {user.Username} е обновил профила си.");
 
-            // Преавтентикация
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email)
             };
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)));
+
+            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                                    new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme))).Wait();
 
             TempData["Success"] = "Профилът е успешно обновен!";
             return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
-        public async Task<IActionResult> Logout()
+        public IActionResult Logout()
         {
             var username = User.Identity.Name;
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).Wait();
 
-            // Логваме изход
             _appLogger.Log($"Потребителят {username} се е излогнал.");
 
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Account/Register
         [HttpGet]
         public IActionResult Register() => View();
 
-        // POST: /Account/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public IActionResult Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
 
-            if (await _context.Users.AnyAsync(u => u.Username == model.Username))
+            if (_database.GetAllUsers().Any(u => u.Username == model.Username))
             {
                 ModelState.AddModelError("Username", "Това потребителско име вече съществува.");
                 return View(model);
             }
 
-            if (await _context.Users.AnyAsync(u => u.Email == model.Email))
+            if (_database.GetAllUsers().Any(u => u.Email == model.Email))
             {
                 ModelState.AddModelError("Email", "Този имейл вече е регистриран.");
                 return View(model);
@@ -146,10 +142,8 @@ namespace Cine_Critic_AI.Controllers
                 Password = _passwordHasher.HashPassword(null, model.Password)
             };
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            _database.InsertUser(user);
 
-            // Логваме регистрация
             _appLogger.Log($"Ново регистриран потребител: {user.Username}");
 
             TempData["Success"] = "Регистрацията е успешна! Влез в профила си.";
