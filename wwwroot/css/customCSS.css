@@ -1,0 +1,148 @@
+﻿body {
+    display: flex;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f8f9fa;
+}
+/* Sidebar основни стилове */
+.sidebar {
+    width: 70px;
+    background-color: #1c1c1c;
+    color: #fff;
+    transition: width 0.3s;
+    overflow-x: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding-top: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+    .sidebar:hover {
+        width: 240px;
+    }
+
+/* Навигационни линкове */
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+    padding: 10px 15px;
+    white-space: nowrap;
+    transition: all 0.25s ease;
+    text-decoration: none;
+}
+
+    .nav-link:hover {
+        background-color: #343a40;
+        color: #fff;
+    }
+
+    .nav-link i {
+        font-size: 1.5rem;
+        width: 24px;
+        text-align: center;
+    }
+
+.link-text {
+    display: none;
+    margin-left: 10px;
+    font-size: 0.95rem;
+}
+
+.sidebar:hover .nav-link {
+    justify-content: flex-start;
+}
+
+.sidebar:hover .link-text {
+    display: inline;
+}
+
+/* Основно съдържание */
+main {
+    flex-grow: 1;
+    margin-left: 70px;
+    padding: 20px;
+    transition: margin-left 0.3s;
+}
+
+.sidebar:hover ~ main {
+    margin-left: 240px;
+}
+
+/* Потребителска секция долу */
+.user-section {
+    border-top: 1px solid #333;
+    padding: 15px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-icon-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.user-icon {
+    font-size: 1.8rem;
+    color: #aaa;
+    transition: transform 0.2s;
+}
+
+.user-icon-link:hover .user-icon {
+    color: #fff;
+}
+
+/* Скриване на инфо при свит sidebar */
+.user-info {
+    display: none;
+    align-items: flex-start;
+    margin-left: 10px;
+}
+
+.user-name {
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.logout-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 0.9rem;
+    margin-top: 2px;
+    margin-left: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+    .logout-btn i {
+        margin-right: 6px;
+    }
+
+    .logout-btn:hover {
+        color: #ff6666;
+    }
+
+/* При hover sidebar показва името и изхода */
+.sidebar:hover .user-section {
+    justify-content: flex-start;
+}
+
+.sidebar:hover .user-info {
+    display: flex;
+}
