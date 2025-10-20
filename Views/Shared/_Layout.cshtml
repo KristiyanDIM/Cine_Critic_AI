@@ -16,49 +16,45 @@
 </head>
 
 <body>
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <div class="nav-links">
-            <a class="nav-link" asp-controller="Home" asp-action="Index">
-                <i class="fa-solid fa-house"></i><span class="link-text">Home</span>
-            </a>
-            <a class="nav-link" asp-controller="Movies" asp-action="Index">
-                <i class="fa-solid fa-film"></i><span class="link-text">Movies</span>
-            </a>
-            <a class="nav-link" asp-controller="Reviews" asp-action="Index">
-                <i class="fa-solid fa-pen-to-square"></i><span class="link-text">Reviews</span>
-            </a>
+        <div class="main-head">
+            <nav class="head-nav">
+                <div class="nav-links">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">
+                        <i class="fa-solid fa-house"></i><span class="link-text">Home</span>
+                    </a>
+                    <a class="nav-link" asp-controller="Movies" asp-action="Index">
+                        <i class="fa-solid fa-film"></i><span class="link-text">Movies</span>
+                    </a>
+                    <a class="nav-link" asp-controller="Reviews" asp-action="Index">
+                        <i class="fa-solid fa-pen-to-square"></i><span class="link-text">Reviews</span>
+                    </a>
 
-            @if (User?.Identity == null || !User.Identity.IsAuthenticated)
+                    @if (User?.Identity == null || !User.Identity.IsAuthenticated)
+                    {
+                        <a class="nav-link" asp-controller="Account" asp-action="Login">
+                            <i class="fa-solid fa-right-to-bracket"></i><span class="link-text">Login</span>
+                        </a>
+                        <a class="nav-link" asp-controller="Account" asp-action="Register">
+                            <i class="fa-solid fa-user-plus"></i><span class="link-text">Register</span>
+                        </a>
+                    }
+                </div>
+            @if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
-                <a class="nav-link" asp-controller="Account" asp-action="Login">
-                    <i class="fa-solid fa-right-to-bracket"></i><span class="link-text">Login</span>
-                </a>
-                <a class="nav-link" asp-controller="Account" asp-action="Register">
-                    <i class="fa-solid fa-user-plus"></i><span class="link-text">Register</span>
-                </a>
-            }
-        </div>
-
-        @if (User?.Identity != null && User.Identity.IsAuthenticated)
-        {
-            <div class="user-section">
-                <a asp-controller="Account" asp-action="EditProfile" class="user-icon-link">
-                    <i class="fa-solid fa-user-circle user-icon"></i>
-                </a>
-                <div class="user-info">
-                    <a asp-controller="Account" asp-action="EditProfile" class="user-icon-link">
-                    <span class="user-name">@User.Identity.Name</span></a>
-                    <a asp-controller="Account" asp-action="Logout" class="logout-btn">
+                <div class="user-footer">
+                    <a class="user-link" asp-controller="Account" asp-action="EditProfile">
+                        <i class="fa-solid fa-user"></i>
+                        <span class="user-name">@User.Identity.Name</span>
+                    </a>
+                    <a class="logout-link" asp-controller="Account" asp-action="Logout">
                         <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Изход</span>
+                        <span class="link-text">Logout</span>
                     </a>
                 </div>
-            </div>
-        }
-    </nav>
+            }
 
-
+            </nav>
+        </div>
 
     <!-- Основно съдържание -->
     <main>

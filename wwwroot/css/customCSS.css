@@ -4,72 +4,7 @@
     margin: 0;
     background-color: #f8f9fa;
 }
-/* Sidebar основни стилове */
-.sidebar {
-    width: 70px;
-    background-color: #1c1c1c;
-    color: #fff;
-    transition: width 0.3s;
-    overflow-x: hidden;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    padding-top: 20px;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
 
-    .sidebar:hover {
-        width: 240px;
-    }
-
-/* Навигационни линкове */
-.nav-links {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.nav-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ccc;
-    padding: 10px 15px;
-    white-space: nowrap;
-    transition: all 0.25s ease;
-    text-decoration: none;
-}
-
-    .nav-link:hover {
-        background-color: #343a40;
-        color: #fff;
-    }
-
-    .nav-link i {
-        font-size: 1.5rem;
-        width: 24px;
-        text-align: center;
-    }
-
-.link-text {
-    display: none;
-    margin-left: 10px;
-    font-size: 0.95rem;
-}
-
-.sidebar:hover .nav-link {
-    justify-content: flex-start;
-}
-
-.sidebar:hover .link-text {
-    display: inline;
-}
-
-/* Основно съдържание */
 main {
     flex-grow: 1;
     margin-left: 70px;
@@ -77,72 +12,121 @@ main {
     transition: margin-left 0.3s;
 }
 
-.sidebar:hover ~ main {
-    margin-left: 240px;
+@import url("https://fonts.googleapis.com/css?family=Roboto:300");
+
+body {
+    margin: 0;
+    font-family: Roboto, sans-serif;
 }
 
-/* Потребителска секция долу */
-.user-section {
-    border-top: 1px solid #333;
-    padding: 15px 10px;
+/* Sidebar контейнер */
+.main-head {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 70px; /* свита ширина */
+    background-color: #000; /* черен фон */
+    transition: width 0.3s;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+    /* Разгъване при hover */
+    .main-head:hover {
+        width: 220px; /* разгъната ширина */
+    }
+
+/* Навигация вътре в sidebar */
+.head-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-link {
     display: flex;
     align-items: center;
-    justify-content: center;
-}
-
-.user-icon-link {
+    color: #fff; /* бял текст */
     text-decoration: none;
-    color: inherit;
+    padding: 15px;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-.user-icon {
-    font-size: 1.8rem;
-    color: #aaa;
-    transition: transform 0.2s;
+    /* Иконите остават на ляво */
+    .nav-link i {
+        font-size: 1.5rem;
+        min-width: 30px;
+        text-align: center;
+    }
+
+/* Текстът се показва само при разгъване */
+.link-text {
+    white-space: nowrap;
+    margin-left: 10px;
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
-.user-icon-link:hover .user-icon {
+/* Показване на текста при hover на sidebar */
+.main-head:hover .link-text {
+    opacity: 1;
+}
+
+/* Hover ефект на отделен линк */
+.nav-link:hover {
+    background-color: #333; /* по-светъл черен / тъмно сив */
     color: #fff;
 }
 
-/* Скриване на инфо при свит sidebar */
-.user-info {
-    display: none;
-    align-items: flex-start;
-    margin-left: 10px;
+/* Sidebar Footer */
+.user-footer {
+    margin-top: auto; /* винаги долу */
+    display: flex;
+    flex-direction: column;
+
 }
 
-.user-name {
-    color: #fff;
-    font-size: 0.95rem;
-}
-
-.logout-btn {
-    background: none;
-    border: none;
-    color: #ccc;
-    font-size: 0.9rem;
-    margin-top: 2px;
-    margin-left: 10px;
-    cursor: pointer;
+/* Линк към профила */
+.user-link, .logout-link {
     display: flex;
     align-items: center;
+    color: #fff;
     text-decoration: none;
+    padding: 15px;
+    transition: background 0.4s, color 0.4s;
 }
 
-    .logout-btn i {
-        margin-right: 6px;
+    .user-link i, .logout-link i {
+        font-size: 1.5rem;
+        min-width: 30px;
+        text-align: center;
     }
 
-    .logout-btn:hover {
-        color: #ff6666;
+    /* Показва текста само при hover/разгънат sidebar */
+    .user-name, .logout-link .link-text {
+        margin-left: 10px;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.4s;
     }
 
-/* При hover sidebar показва името и изхода */
-.sidebar:hover .user-section {
-    justify-content: flex-start;
+/* Когато sidebar се разгъне */
+.main-head:hover .user-name,
+.main-head:hover .logout-link .link-text {
+    opacity: 1;
 }
 
-.sidebar:hover .user-info {
-    display: flex;
+/* Hover ефект (като горните линкове) */
+.user-link:hover, .logout-link:hover {
+    background-color: #222; /* малко по-светъл черен/сив */
+    color: #fff;
 }
