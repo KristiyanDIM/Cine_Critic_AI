@@ -25,6 +25,9 @@ namespace Cine_Critic_AI.Models
 
         [Display(Name = "Описание (по избор)")]
         public string? Description { get; set; } // вече не е задължително
+
+        [Display(Name = "Изображение (URL или локален път)")]
+        public string? ImageUrl { get; set; }
     }
 }
 
