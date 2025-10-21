@@ -1,8 +1,9 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System;
 
 namespace Cine_Critic_AI.Services
 {
@@ -47,7 +48,7 @@ namespace Cine_Critic_AI.Services
             var json = JsonSerializer.Serialize(new
             {
                 model = "llama3",
-                prompt = $"Определи емоционалния тон на следния текст като една дума (позитивен, неутрален или негативен): {text}"
+                prompt = $"Определи емоционалния тон на следния текст като една дума: позитивен, неутрален или негативен. Текст: {text}"
             });
 
             try
@@ -62,16 +63,26 @@ namespace Cine_Critic_AI.Services
                 var sb = new StringBuilder();
                 foreach (var line in lines)
                 {
-                    var doc = JsonDocument.Parse(line);
-                    if (doc.RootElement.TryGetProperty("response", out var resp))
-                        sb.Append(resp.GetString());
+                    try
+                    {
+                        var doc = JsonDocument.Parse(line);
+                        if (doc.RootElement.TryGetProperty("response", out var resp))
+                            sb.Append(resp.GetString());
+                    }
+                    catch { } // Игнорирай редове, които не са JSON
                 }
 
                 var result = sb.ToString().Trim().ToLower();
 
-                // Опростена обработка на отговора
-                if (result.Contains("позитив")) return "позитивен";
-                if (result.Contains("негатив")) return "негативен";
+                // 💡 по-гъвкаво търсене на ключови думи
+                if (Regex.IsMatch(result, @"позитив|положител", RegexOptions.IgnoreCase))
+                    return "позитивен";
+                if (Regex.IsMatch(result, @"негатив|отрицател", RegexOptions.IgnoreCase))
+                    return "негативен";
+                if (Regex.IsMatch(result, @"неутрал", RegexOptions.IgnoreCase))
+                    return "неутрален";
+
+                // fallback — ако не разпознае нищо
                 return "неутрален";
             }
             catch (Exception ex)
@@ -80,6 +91,7 @@ namespace Cine_Critic_AI.Services
                 return "грешка при анализ";
             }
         }
+
 
 
         /// <summary>
