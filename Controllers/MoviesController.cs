@@ -63,6 +63,8 @@ namespace Cine_Critic_AI.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Movie movie)
         {
+            Console.WriteLine($"DEBUG: ImageUrl = '{movie.ImageUrl}'");
+
             if (ModelState.IsValid)
             {
                 _database.InsertMovie(movie);

@@ -27,35 +27,35 @@ namespace Cine_Critic_AI.Services
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-        CREATE TABLE IF NOT EXISTS Users(
-            Id INTEGER PRIMARY KEY AUTOINCREMENT,
-            Username TEXT NOT NULL UNIQUE,
-            Email TEXT NOT NULL UNIQUE,
-            Password TEXT NOT NULL,
-            RegisteredOn TEXT
-        );
+            CREATE TABLE IF NOT EXISTS Users(
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Username TEXT NOT NULL UNIQUE,
+                Email TEXT NOT NULL UNIQUE,
+                Password TEXT NOT NULL,
+                RegisteredOn TEXT
+            );
 
-        CREATE TABLE IF NOT EXISTS Movies(
-            Id INTEGER PRIMARY KEY AUTOINCREMENT,
-            Title TEXT NOT NULL,
-            Year INTEGER NOT NULL,
-            Genre TEXT NOT NULL,
-            Director TEXT NOT NULL,
-            Description TEXT
-        );
+            CREATE TABLE IF NOT EXISTS Movies(
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Title TEXT NOT NULL,
+                Year INTEGER NOT NULL,
+                Genre TEXT NOT NULL,
+                Director TEXT NOT NULL,
+                Description TEXT,
+                ImageUrl TEXT
+            );
 
-        CREATE TABLE IF NOT EXISTS Reviews(
-            Id INTEGER PRIMARY KEY AUTOINCREMENT,
-            Rate INTEGER NOT NULL,
-            Comment TEXT,
-            EmotionTone TEXT,
-            Date TEXT NOT NULL
-            -- MovieId ще добавим отделно, ако липсва
-        );
-    ";
+            CREATE TABLE IF NOT EXISTS Reviews(
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Rate INTEGER NOT NULL,
+                Comment TEXT,
+                EmotionTone TEXT,
+                Date TEXT NOT NULL
+            );
+            ";
             cmd.ExecuteNonQuery();
 
-            // Проверка дали колоната MovieId съществува
+            // Проверка и добавяне на MovieId в Reviews, ако липсва
             cmd.CommandText = "PRAGMA table_info(Reviews);";
             using var reader = cmd.ExecuteReader();
             bool movieIdExists = false;
@@ -69,10 +69,29 @@ namespace Cine_Critic_AI.Services
             }
             reader.Close();
 
-            // Ако няма MovieId, добавяме колоната
             if (!movieIdExists)
             {
                 cmd.CommandText = "ALTER TABLE Reviews ADD COLUMN MovieId INTEGER DEFAULT 1;";
+                cmd.ExecuteNonQuery();
+            }
+
+            // Проверка и добавяне на ImageUrl в Movies, ако липсва
+            cmd.CommandText = "PRAGMA table_info(Movies);";
+            using var reader2 = cmd.ExecuteReader();
+            bool imageUrlExists = false;
+            while (reader2.Read())
+            {
+                if (reader2["name"].ToString() == "ImageUrl")
+                {
+                    imageUrlExists = true;
+                    break;
+                }
+            }
+            reader2.Close();
+
+            if (!imageUrlExists)
+            {
+                cmd.CommandText = "ALTER TABLE Movies ADD COLUMN ImageUrl TEXT;";
                 cmd.ExecuteNonQuery();
             }
         }
@@ -163,13 +182,14 @@ namespace Cine_Critic_AI.Services
             conn.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-                INSERT INTO Movies (Title, Year, Genre, Director, Description)
-                VALUES (@Title, @Year, @Genre, @Director, @Description)";
+                INSERT INTO Movies (Title, Year, Genre, Director, Description, ImageUrl)
+                VALUES (@Title, @Year, @Genre, @Director, @Description, @ImageUrl)";
             cmd.Parameters.AddWithValue("@Title", movie.Title);
             cmd.Parameters.AddWithValue("@Year", movie.Year);
             cmd.Parameters.AddWithValue("@Genre", movie.Genre);
             cmd.Parameters.AddWithValue("@Director", movie.Director);
             cmd.Parameters.AddWithValue("@Description", movie.Description ?? "");
+            cmd.Parameters.AddWithValue("@ImageUrl", movie.ImageUrl ?? "");
             cmd.ExecuteNonQuery();
         }
 
@@ -184,13 +204,15 @@ namespace Cine_Critic_AI.Services
                     Year = @Year,
                     Genre = @Genre,
                     Director = @Director,
-                    Description = @Description
+                    Description = @Description,
+                    ImageUrl = @ImageUrl
                 WHERE Id = @Id";
             cmd.Parameters.AddWithValue("@Title", movie.Title);
             cmd.Parameters.AddWithValue("@Year", movie.Year);
             cmd.Parameters.AddWithValue("@Genre", movie.Genre);
             cmd.Parameters.AddWithValue("@Director", movie.Director);
             cmd.Parameters.AddWithValue("@Description", movie.Description ?? "");
+            cmd.Parameters.AddWithValue("@ImageUrl", movie.ImageUrl ?? "");
             cmd.Parameters.AddWithValue("@Id", movie.Id);
             cmd.ExecuteNonQuery();
         }
@@ -222,7 +244,8 @@ namespace Cine_Critic_AI.Services
                     Year = Convert.ToInt32(reader["Year"]),
                     Genre = reader["Genre"].ToString(),
                     Director = reader["Director"].ToString(),
-                    Description = reader["Description"].ToString()
+                    Description = reader["Description"].ToString(),
+                    ImageUrl = reader["ImageUrl"] != DBNull.Value ? reader["ImageUrl"].ToString() : ""
                 });
             }
             return movies;
@@ -246,7 +269,8 @@ namespace Cine_Critic_AI.Services
                     Year = Convert.ToInt32(reader["Year"]),
                     Genre = reader["Genre"].ToString(),
                     Director = reader["Director"].ToString(),
-                    Description = reader["Description"].ToString()
+                    Description = reader["Description"].ToString(),
+                    ImageUrl = reader["ImageUrl"] != DBNull.Value ? reader["ImageUrl"].ToString() : ""
                 };
             }
             return null;
@@ -259,8 +283,8 @@ namespace Cine_Critic_AI.Services
             conn.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-        INSERT INTO Reviews (Rate, Comment, EmotionTone, Date, MovieId)
-        VALUES (@Rate, @Comment, @EmotionTone, @Date, @MovieId)";
+                INSERT INTO Reviews (Rate, Comment, EmotionTone, Date, MovieId)
+                VALUES (@Rate, @Comment, @EmotionTone, @Date, @MovieId)";
             cmd.Parameters.AddWithValue("@Rate", review.Rate);
             cmd.Parameters.AddWithValue("@Comment", review.Comment ?? "");
             cmd.Parameters.AddWithValue("@EmotionTone", review.EmotionTone ?? "");
@@ -306,9 +330,9 @@ namespace Cine_Critic_AI.Services
             conn.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-        SELECT r.*, m.Title, m.Year, m.Genre, m.Director, m.Description
-        FROM Reviews r
-        JOIN Movies m ON r.MovieId = m.Id";
+                SELECT r.*, m.Title, m.Year, m.Genre, m.Director, m.Description, m.ImageUrl
+                FROM Reviews r
+                JOIN Movies m ON r.MovieId = m.Id";
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
@@ -327,7 +351,8 @@ namespace Cine_Critic_AI.Services
                         Year = Convert.ToInt32(reader["Year"]),
                         Genre = reader["Genre"].ToString(),
                         Director = reader["Director"].ToString(),
-                        Description = reader["Description"].ToString()
+                        Description = reader["Description"].ToString(),
+                        ImageUrl = reader["ImageUrl"] != DBNull.Value ? reader["ImageUrl"].ToString() : ""
                     }
                 });
             }
@@ -351,7 +376,8 @@ namespace Cine_Critic_AI.Services
                     Rate = Convert.ToInt32(reader["Rate"]),
                     Comment = reader["Comment"].ToString(),
                     EmotionTone = reader["EmotionTone"].ToString(),
-                    Date = DateTime.Parse(reader["Date"].ToString())
+                    Date = DateTime.Parse(reader["Date"].ToString()),
+                    MovieId = reader["MovieId"] != DBNull.Value ? Convert.ToInt32(reader["MovieId"]) : 0
                 };
             }
             return null;
