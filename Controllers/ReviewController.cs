@@ -2,6 +2,7 @@
 using Cine_Critic_AI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.RegularExpressions;
 
 namespace Cine_Critic_AI.Controllers
@@ -12,7 +13,6 @@ namespace Cine_Critic_AI.Controllers
         private readonly AppLoggerSingleton _appLogger;
         private readonly LocalAIService _ai;
 
-        // Единен конструктор – съдържа всички зависимости
         public ReviewsController(DatabaseService database, AppLoggerSingleton appLogger, LocalAIService ai)
         {
             _database = database;
@@ -44,6 +44,7 @@ namespace Cine_Critic_AI.Controllers
         [Authorize]
         public IActionResult Create()
         {
+            PopulateMoviesDropDown();
             return View();
         }
 
@@ -59,6 +60,8 @@ namespace Cine_Critic_AI.Controllers
                 _appLogger.Log($"Потребителят създаде ново ревю (ID {review.Id}).");
                 return RedirectToAction(nameof(Index));
             }
+
+            PopulateMoviesDropDown(review.MovieId);
             return View(review);
         }
 
@@ -73,6 +76,7 @@ namespace Cine_Critic_AI.Controllers
             if (review == null)
                 return NotFound();
 
+            PopulateMoviesDropDown(review.MovieId);
             return View(review);
         }
 
@@ -91,6 +95,8 @@ namespace Cine_Critic_AI.Controllers
                 _appLogger.Log($"Потребителят редактира ревюто (ID {review.Id}).");
                 return RedirectToAction(nameof(Index));
             }
+
+            PopulateMoviesDropDown(review.MovieId);
             return View(review);
         }
 
@@ -141,8 +147,6 @@ namespace Cine_Critic_AI.Controllers
             });
         }
 
-
-
         private int ExtractRatingFromText(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return 0;
@@ -164,22 +168,20 @@ namespace Cine_Critic_AI.Controllers
                 if (string.IsNullOrWhiteSpace(emotion))
                     emotion = "неутрален";
 
-                // върни само чист текст (по-лесно за JS)
                 return Content(emotion);
             }
             catch (Exception ex)
             {
-                // логни грешката
                 _appLogger.Log($"AnalyzeEmotion error: {ex.Message}");
                 return Content("грешка при анализ");
             }
         }
 
-
-
-
-
-
-
+        // ✅ В помощен метод попълваме падащото меню с филми
+        private void PopulateMoviesDropDown(object selectedMovieId = null)
+        {
+            var movies = _database.GetAllMovies(); // метод за всички филми
+            ViewBag.Movies = new SelectList(movies, "Id", "Title", selectedMovieId);
+        }
     }
 }

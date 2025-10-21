@@ -10,6 +10,14 @@
     <div asp-validation-summary="All" class="text-danger"></div>
 
     <div class="form-group mb-3">
+        <label asp-for="MovieId" class="form-label">Филм</label>
+        <select asp-for="MovieId" class="form-control" asp-items="ViewBag.Movies">
+            <option value="">-- Изберете филм --</option>
+        </select>
+        <span asp-validation-for="MovieId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
         <label asp-for="Rate" class="form-label"></label>
         <input asp-for="Rate" class="form-control" placeholder="Оценка (1-5)" id="rateInput" />
         <span asp-validation-for="Rate" class="text-danger"></span>
@@ -42,7 +50,7 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-                document.getElementById("aiButton").addEventListener("click", async function () {
+        document.getElementById("aiButton").addEventListener("click", async function () {
             const rate = document.getElementById("rateInput").value;
             if (!rate) { alert("Моля, въведи оценка."); return; }
 

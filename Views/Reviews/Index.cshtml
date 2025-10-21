@@ -13,6 +13,7 @@
 <table class="table table-striped">
     <thead>
         <tr>
+            <th>Име на филм</th>
             <th>Оценка</th>
             <th>Коментар</th>
             <th>Емоционален тон</th>
@@ -24,6 +25,7 @@
         @foreach (var review in Model)
         {
             <tr>
+				<td>@review.Movie?.Title</td>
                 <td>@review.Rate</td>
                 <td>@review.Comment</td>
                 <td>@review.EmotionTone</td>

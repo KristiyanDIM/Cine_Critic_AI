@@ -14,17 +14,21 @@ namespace Cine_Critic_AI.Models
         public int Rate { get; set; }
 
         [Display(Name = "Коментар (по избор)")]
-        public string? Comment { get; set; } // вече не е задължително
+        public string? Comment { get; set; }
 
         [StringLength(50)]
         [Display(Name = "Емоционален тон")]
-        public string? EmotionTone { get; set; } // може и това да е незадължително
+        public string? EmotionTone { get; set; }
 
         [Required]
         [Display(Name = "Дата")]
         public DateTime Date { get; set; } = DateTime.Now;
 
-        public int UserId { get; set; } // Връзка към потребителя
-        public int MovieId { get; set; } // Връзка към филма
+        [Required]
+        [Display(Name = "Филм")]
+        public int MovieId { get; set; } // вече имаш
+
+        public Movie? Movie { get; set; } // navigation property
     }
+
 }
