@@ -23,7 +23,7 @@
 
     <div class="form-group mb-3">
         <label asp-for="EmotionTone" class="form-label"></label>
-        <input asp-for="EmotionTone" class="form-control" placeholder="Емоционален тон (напр. позитивен, неутрален, негативен)" id="toneInput" />
+        <input asp-for="EmotionTone" class="form-control" placeholder="Емоционален тон" id="toneInput" readonly />
         <span asp-validation-for="EmotionTone" class="text-danger"></span>
     </div>
 
@@ -42,38 +42,29 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        document.getElementById("aiButton").addEventListener("click", async function () {
+                document.getElementById("aiButton").addEventListener("click", async function () {
             const rate = document.getElementById("rateInput").value;
-            const tone = document.getElementById("toneInput").value;
+            if (!rate) { alert("Моля, въведи оценка."); return; }
 
-            if (!rate) {
-                alert("Моля, въведи оценка (1–5), за да може AI да предложи подходящ коментар.");
-                return;
-            }
-
-            const description = tone ? `Тон: ${tone}` : "без определен тон";
+            const description = `Филм с оценка ${rate}`;
 
             try {
                 const response = await fetch('/Reviews/Generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `title=Филм с оценка ${rate}&description=${encodeURIComponent(description)}`
+                    body: `description=${encodeURIComponent(description)}`
                 });
 
                 if (response.ok) {
-                    const html = await response.text();
-                    const tempDiv = document.createElement("div");
-                    tempDiv.innerHTML = html;
-
-                    // Извличаме AI текста от View-то "Generated"
-                    const generated = tempDiv.querySelector("p")?.textContent || "Неуспешно генериране на ревю.";
-
-                    document.getElementById("commentInput").value = generated;
+                    const data = await response.json();
+                    document.getElementById("commentInput").value = data.comment;
+                    document.getElementById("toneInput").value = data.emotion;
+                    document.getElementById("rateInput").value = data.rate;
                 } else {
-                    alert("❌ Грешка при свързване с AI услугата.");
+                    alert("Грешка при свързване с AI.");
                 }
             } catch (error) {
-                alert("⚠️ Възникна грешка: " + error);
+                alert("Възникна грешка: " + error);
             }
         });
     </script>

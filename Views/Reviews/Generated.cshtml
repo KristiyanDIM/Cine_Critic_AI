@@ -1,9 +1,18 @@
-﻿@{
+﻿@model Cine_Critic_AI.Models.Review
+
+@{
     ViewData["Title"] = "Генерирано ревю";
 }
 
 <h2>@ViewData["Title"]</h2>
 
-<p>@ViewBag.GeneratedReview</p>
+<div class="card mt-3">
+    <div class="card-body">
+        <p><strong>Коментар:</strong> @Model.Comment</p>
+        <p><strong>Емоционален тон:</strong> @Model.EmotionTone</p>
+        <p><strong>Оценка:</strong> @Model.Rate</p>
+        <p><strong>Дата:</strong> @Model.Date.ToString("dd.MM.yyyy")</p>
+    </div>
+</div>
 
-<a asp-action="Index" class="btn btn-secondary">⬅️ Назад</a>
+<a asp-action="Index" class="btn btn-secondary mt-3">⬅️ Назад</a>

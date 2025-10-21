@@ -16,7 +16,8 @@ namespace CineCritic_AI
 
             // Регистрираме Logger Singleton
             builder.Services.AddSingleton(AppLoggerSingleton.Instance);
-            builder.Services.AddSingleton<LocalAIService>();
+            builder.Services.AddHttpClient<LocalAIService>();
+
 
             // Authentication
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

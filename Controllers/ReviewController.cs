@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Cine_Critic_AI.Models;
+﻿using Cine_Critic_AI.Models;
 using Cine_Critic_AI.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
 namespace Cine_Critic_AI.Controllers
 {
@@ -125,11 +126,60 @@ namespace Cine_Critic_AI.Controllers
 
         // AI функционалност
         [HttpPost]
-        public async Task<IActionResult> Generate(string title, string description)
+        [Authorize]
+        public async Task<IActionResult> Generate(string description)
         {
-            var review = await _ai.GenerateReviewAsync(title, description);
-            ViewBag.GeneratedReview = review;
-            return View("Generated");
+            var generatedText = await _ai.GenerateReviewAsync("AI Generated Review", description);
+            var emotion = await _ai.ExtractEmotionFromTextAsync(generatedText);
+            var rating = ExtractRatingFromText(generatedText ?? "");
+
+            return Json(new
+            {
+                comment = generatedText ?? "",
+                emotion = emotion ?? "неутрален",
+                rate = rating > 0 ? rating : 3
+            });
         }
+
+
+
+        private int ExtractRatingFromText(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return 0;
+
+            var match = Regex.Match(text, @"([1-5])\s*(\/\s*5|от\s*5|рейтинг|rating|оценка)?", RegexOptions.IgnoreCase);
+            return match.Success && int.TryParse(match.Groups[1].Value, out int value) ? value : 0;
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> AnalyzeEmotion([FromForm] string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return Content("неутрален");
+
+            try
+            {
+                var emotion = await _ai.ExtractEmotionFromTextAsync(text);
+                if (string.IsNullOrWhiteSpace(emotion))
+                    emotion = "неутрален";
+
+                // върни само чист текст (по-лесно за JS)
+                return Content(emotion);
+            }
+            catch (Exception ex)
+            {
+                // логни грешката
+                _appLogger.Log($"AnalyzeEmotion error: {ex.Message}");
+                return Content("грешка при анализ");
+            }
+        }
+
+
+
+
+
+
+
     }
 }
