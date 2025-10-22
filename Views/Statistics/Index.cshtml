@@ -1,0 +1,43 @@
+﻿@model Cine_Critic_AI.Models.StatisticsViewModel
+
+@{
+    ViewData["Title"] = "Статистика";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">📊 Статистика на сайта</h2>
+
+    <div class="row text-center">
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h4>🎬 Филми</h4>
+                <p class="display-6">@Model.TotalMovies</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h4>📝 Ревюта</h4>
+                <p class="display-6">@Model.TotalReviews</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h4>⭐ Среден рейтинг</h4>
+                <p class="display-6">@Model.AverageRating.ToString("0.0")</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h4>🏆 Най-популярен филм</h4>
+                <p class="fw-bold">@Model.TopMovie</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a class="btn btn-primary" href="/Home/Index">⬅ Обратно към началото</a>
+    </div>
+</div>
