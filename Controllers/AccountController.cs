@@ -10,11 +10,12 @@ using System.Security.Claims;
 namespace Cine_Critic_AI.Controllers
 {
     public class AccountController : Controller
-    {
+    {   
         private readonly DatabaseService _database; // Singleton DAO
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly AppLoggerSingleton _appLogger;
 
+        // Конструктор с Dependency Injection
         public AccountController(DatabaseService database, AppLoggerSingleton appLogger)
         {
             _database = database;
@@ -41,6 +42,7 @@ namespace Cine_Critic_AI.Controllers
                 return View(model);
             }
 
+            // Логваме успешното влизане чрез Singleton Logger
             _appLogger.Log($"Потребителят {user.Username} се логна успешно.");
 
             var claims = new List<Claim>
@@ -84,9 +86,10 @@ namespace Cine_Critic_AI.Controllers
             if (!string.IsNullOrEmpty(model.NewPassword))
                 user.Password = _passwordHasher.HashPassword(user, model.NewPassword);
 
-            // Тук би трябвало да имаш метод в Database за UpdateUser
+            // Записване на промените в Singleton DatabaseService
             _database.UpdateUser(user);
 
+            // Логваме обновлението на профила чрез Singleton Logger
             _appLogger.Log($"Потребителят {user.Username} е обновил профила си.");
 
             var claims = new List<Claim>
@@ -144,6 +147,7 @@ namespace Cine_Critic_AI.Controllers
 
             _database.InsertUser(user);
 
+            // Логваме регистрацията на нов потребител
             _appLogger.Log($"Ново регистриран потребител: {user.Username}");
 
             TempData["Success"] = "Регистрацията е успешна! Влез в профила си.";

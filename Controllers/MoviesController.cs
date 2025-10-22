@@ -7,9 +7,11 @@ namespace Cine_Critic_AI.Controllers
 {
     public class MoviesController : Controller
     {
+        // Зависимости, инжектирани чрез DI
         private readonly DatabaseService _database;
-        private readonly AppLoggerSingleton _appLogger;
+        private readonly AppLoggerSingleton _appLogger; // Singleton Logger
 
+        // Конструктор с Dependency Injection
         public MoviesController(DatabaseService database, AppLoggerSingleton appLogger)
         {
             _database = database;
@@ -27,6 +29,7 @@ namespace Cine_Critic_AI.Controllers
         public IActionResult Index()
         {
             var movies = _database.GetAllMovies();
+            // Логваме действието на потребителя чрез Singleton Logger
             _appLogger.Log($"{GetCurrentUser()} зареди списъка с филми.");
             return View(movies);
         }
@@ -54,6 +57,7 @@ namespace Cine_Critic_AI.Controllers
         [Authorize]
         public IActionResult Create()
         {
+            // Логваме отварянето на страницата за създаване на филм
             _appLogger.Log($"{GetCurrentUser()} отвори страницата за създаване на нов филм.");
             return View();
         }
@@ -68,6 +72,7 @@ namespace Cine_Critic_AI.Controllers
             if (ModelState.IsValid)
             {
                 _database.InsertMovie(movie);
+                // Логваме добавянето на нов филм
                 _appLogger.Log($"{GetCurrentUser()} добави нов филм: {movie.Title} ({movie.Year})");
                 return RedirectToAction(nameof(Index));
             }
@@ -108,6 +113,7 @@ namespace Cine_Critic_AI.Controllers
             if (ModelState.IsValid)
             {
                 _database.UpdateMovie(movie);
+                // Логваме редактирането на филм
                 _appLogger.Log($"{GetCurrentUser()} редактира филма: {movie.Title}");
                 return RedirectToAction(nameof(Index));
             }
@@ -143,6 +149,7 @@ namespace Cine_Critic_AI.Controllers
             if (movie != null)
             {
                 _database.DeleteMovie(id);
+                // Логваме изтриването на филм
                 _appLogger.Log($"{GetCurrentUser()} изтри филма: {movie.Title}");
             }
             else

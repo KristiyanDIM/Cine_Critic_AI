@@ -8,9 +8,10 @@ namespace CineCritic_AI.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        // Singleton Logger за цялото приложение
         private readonly AppLoggerSingleton _appLogger;
 
-
+        // Конструктор с Dependency Injection
         public HomeController(ILogger<HomeController> logger, AppLoggerSingleton appLogger)
         {
             _logger = logger;
@@ -19,6 +20,7 @@ namespace CineCritic_AI.Controllers
 
         public IActionResult Index()
         {
+            //Логваме посещението на началната страница
             _appLogger.Log("Потребителят е посетил началната страница.");
             return View();
         }

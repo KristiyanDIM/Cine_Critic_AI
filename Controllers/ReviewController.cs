@@ -9,10 +9,12 @@ namespace Cine_Critic_AI.Controllers
 {
     public class ReviewsController : Controller
     {
+        // Зависимости, инжектирани чрез DI
         private readonly DatabaseService _database;
         private readonly AppLoggerSingleton _appLogger;
         private readonly LocalAIService _ai;
 
+        // Конструктор с Dependency Injection
         public ReviewsController(DatabaseService database, AppLoggerSingleton appLogger, LocalAIService ai)
         {
             _database = database;
@@ -57,6 +59,7 @@ namespace Cine_Critic_AI.Controllers
             if (ModelState.IsValid)
             {
                 _database.InsertReview(review);
+                // Логваме събитието чрез Singleton Logger
                 _appLogger.Log($"Потребителят създаде ново ревю (ID {review.Id}).");
                 return RedirectToAction(nameof(Index));
             }
@@ -92,6 +95,7 @@ namespace Cine_Critic_AI.Controllers
             if (ModelState.IsValid)
             {
                 _database.UpdateReview(review);
+                // Логваме редакцията чрез Singleton Logger
                 _appLogger.Log($"Потребителят редактира ревюто (ID {review.Id}).");
                 return RedirectToAction(nameof(Index));
             }
@@ -124,6 +128,7 @@ namespace Cine_Critic_AI.Controllers
             if (review != null)
             {
                 _database.DeleteReview(id);
+                // Логваме изтриването чрез Singleton Logger
                 _appLogger.Log($"Потребителят изтри ревюто (ID {id}).");
             }
 
@@ -172,6 +177,7 @@ namespace Cine_Critic_AI.Controllers
             }
             catch (Exception ex)
             {
+                // Логваме грешките чрез Singleton Logger
                 _appLogger.Log($"AnalyzeEmotion error: {ex.Message}");
                 return Content("грешка при анализ");
             }
