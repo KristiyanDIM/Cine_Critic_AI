@@ -4,45 +4,129 @@
     ViewData["Title"] = "Редактирай филм";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container mt-5">
+    <div class="edit-movie-card mx-auto p-4 shadow-sm rounded-3">
+        <h2 class="text-center text-primary mb-4 fw-bold">✏️ @ViewData["Title"]</h2>
 
-<form asp-action="Edit" method="post" class="mt-3">
-    <input type="hidden" asp-for="Id" />
-    <div asp-validation-summary="All" class="text-danger"></div>
+        <form asp-action="Edit" method="post" class="edit-movie-form">
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
-    <div class="form-group mb-3">
-        <label asp-for="Title" class="form-label"></label>
-        <input asp-for="Title" class="form-control" />
-        <span asp-validation-for="Title" class="text-danger"></span>
+            <div class="mb-3 text-center">
+                <label class="form-label fw-semibold">Текущо изображение</label><br />
+                <img src="@(!string.IsNullOrEmpty(Model.ImageUrl) ? Model.ImageUrl : "/images/default_poster.jpg")"
+                     alt="@Model.Title" class="current-movie-image mb-2" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ImageUrl" class="form-label fw-semibold">Смени изображение (URL)</label>
+                <input asp-for="ImageUrl" class="form-control" placeholder="Въведете URL на изображение" />
+                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label fw-semibold"></label>
+                <input asp-for="Title" class="form-control form-control-lg" placeholder="Въведете заглавие" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Year" class="form-label fw-semibold"></label>
+                    <input asp-for="Year" class="form-control" placeholder="Година" />
+                    <span asp-validation-for="Year" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Genre" class="form-label fw-semibold"></label>
+                    <input asp-for="Genre" class="form-control" placeholder="Жанр" />
+                    <span asp-validation-for="Genre" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Director" class="form-label fw-semibold"></label>
+                <input asp-for="Director" class="form-control" placeholder="Режисьор" />
+                <span asp-validation-for="Director" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Description" class="form-label fw-semibold"></label>
+                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Добавете описание"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-center">
+                <button type="submit" class="btn btn-save flex-grow-1">💾 Запази промените</button>
+                <a asp-action="Index" class="btn btn-cancel flex-grow-1">⬅️ Назад</a>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div class="form-group mb-3">
-        <label asp-for="Year" class="form-label"></label>
-        <input asp-for="Year" class="form-control" />
-        <span asp-validation-for="Year" class="text-danger"></span>
-    </div>
+<style>
+    .edit-movie-card {
+        max-width: 600px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
 
-    <div class="form-group mb-3">
-        <label asp-for="Genre" class="form-label"></label>
-        <input asp-for="Genre" class="form-control" />
-        <span asp-validation-for="Genre" class="text-danger"></span>
-    </div>
+        .edit-movie-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
 
-    <div class="form-group mb-3">
-        <label asp-for="Director" class="form-label"></label>
-        <input asp-for="Director" class="form-control" />
-        <span asp-validation-for="Director" class="text-danger"></span>
-    </div>
+    .current-movie-image {
+        width: 200px;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
 
-    <div class="form-group mb-3">
-        <label asp-for="Description" class="form-label"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
+    .edit-movie-form label {
+        color: #333;
+        font-size: 0.95rem;
+    }
 
-    <button type="submit" class="btn btn-primary">💾 Запази промените</button>
-    <a asp-action="Index" class="btn btn-secondary">⬅️ Назад</a>
-</form>
+    .edit-movie-form input,
+    .edit-movie-form textarea {
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+        .edit-movie-form input:focus,
+        .edit-movie-form textarea:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 5px rgba(74,144,226,0.4);
+        }
+
+    .btn-save {
+        background-color: #4a90e2;
+        color: #fff;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+        .btn-save:hover {
+            background-color: #357ab8;
+            transform: scale(1.03);
+        }
+
+    .btn-cancel {
+        background-color: #6c757d;
+        color: #fff;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+        .btn-cancel:hover {
+            background-color: #5a6268;
+            transform: scale(1.03);
+        }
+</style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

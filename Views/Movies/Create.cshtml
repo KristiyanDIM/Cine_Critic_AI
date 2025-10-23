@@ -4,51 +4,110 @@
     ViewData["Title"] = "Добави нов филм";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container mt-5">
+    <div class="form-card mx-auto p-4">
+        <h2 class="text-center mb-4">🎬 Добави нов филм</h2>
 
-<form asp-action="Create" method="post" class="mt-3">
-    <div asp-validation-summary="All" class="text-danger"></div>
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="All" class="text-danger text-center mb-3"></div>
 
-    <div class="form-group mb-3">
-        <label asp-for="Title" class="form-label"></label>
-        <input asp-for="Title" class="form-control" placeholder="Въведете заглавие" />
-        <span asp-validation-for="Title" class="text-danger"></span>
+            <div class="form-group mb-3">
+                <label asp-for="Title" class="form-label fw-semibold">Заглавие</label>
+                <input asp-for="Title" class="form-control" placeholder="Въведете заглавие" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ImageUrl" class="form-label fw-semibold">Снимка (URL)</label>
+                <input asp-for="ImageUrl" class="form-control" placeholder="Въведете URL на изображение (по избор)" />
+                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Year" class="form-label fw-semibold">Година</label>
+                <input asp-for="Year" class="form-control" placeholder="Въведете година" />
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Genre" class="form-label fw-semibold">Жанр</label>
+                <input asp-for="Genre" class="form-control" placeholder="Въведете жанр" />
+                <span asp-validation-for="Genre" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Director" class="form-label fw-semibold">Режисьор</label>
+                <input asp-for="Director" class="form-control" placeholder="Въведете режисьор" />
+                <span asp-validation-for="Director" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="Description" class="form-label fw-semibold">Описание</label>
+                <textarea asp-for="Description" rows="4" class="form-control" placeholder="Добавете описание (по избор)"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-success btn-lg px-4 me-2">
+                    💾 Запази
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4">
+                    ⬅️ Назад
+                </a>
+            </div>
+        </form>
     </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="ImageUrl" class="form-label"></label>
-        <input asp-for="ImageUrl" class="form-control" placeholder="Въведете URL на изображение (по избор)" />
-        <span asp-validation-for="ImageUrl" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="Year" class="form-label"></label>
-        <input asp-for="Year" class="form-control" placeholder="Въведете година" />
-        <span asp-validation-for="Year" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="Genre" class="form-label"></label>
-        <input asp-for="Genre" class="form-control" placeholder="Въведете жанр" />
-        <span asp-validation-for="Genre" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="Director" class="form-label"></label>
-        <input asp-for="Director" class="form-control" placeholder="Въведете режисьор" />
-        <span asp-validation-for="Director" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="Description" class="form-label"></label>
-        <textarea asp-for="Description" class="form-control" placeholder="Добавете описание (по избор)"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-success">💾 Запази</button>
-    <a asp-action="Index" class="btn btn-secondary">⬅️ Назад</a>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+
+<style>
+    .form-card {
+        max-width: 600px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+        .form-card:hover {
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+            transform: translateY(-3px);
+        }
+
+    .form-label {
+        color: #333;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        padding: 10px 14px;
+        transition: all 0.2s;
+    }
+
+        .form-control:focus {
+            border-color: #198754;
+            box-shadow: 0 0 0 0.2rem rgba(25,135,84,0.25);
+        }
+
+    .btn-success {
+        background-color: #198754;
+        border: none;
+    }
+
+        .btn-success:hover {
+            background-color: #157347;
+        }
+
+    .btn-outline-secondary:hover {
+        background-color: #e9ecef;
+    }
+
+    h2 {
+        color: #222;
+        font-weight: 600;
+    }
+</style>
