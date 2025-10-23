@@ -4,40 +4,54 @@
     ViewData["Title"] = "Статистика";
 }
 
-<div class="container mt-5">
-    <h2 class="mb-4 text-center">📊 Статистика на сайта</h2>
+<div class="stats-container mt-5">
+    <h2 class="page-title">📊 Статистика на сайта</h2>
 
-    <div class="row text-center">
-        <div class="col-md-3">
-            <div class="card shadow-sm p-3">
-                <h4>🎬 Филми</h4>
-                <p class="display-6">@Model.TotalMovies</p>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary">
+                <i class="bi bi-film"></i>
+            </div>
+            <div class="stat-info">
+                <h5>Филми</h5>
+                <p>@Model.TotalMovies</p>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm p-3">
-                <h4>📝 Ревюта</h4>
-                <p class="display-6">@Model.TotalReviews</p>
+        <div class="stat-card">
+            <div class="stat-icon bg-success">
+                <i class="bi bi-chat-left-text"></i>
+            </div>
+            <div class="stat-info">
+                <h5>Ревюта</h5>
+                <p>@Model.TotalReviews</p>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm p-3">
-                <h4>⭐ Среден рейтинг</h4>
-                <p class="display-6">@Model.AverageRating.ToString("0.0")</p>
+        <div class="stat-card">
+            <div class="stat-icon bg-warning text-dark">
+                <i class="bi bi-star-fill"></i>
+            </div>
+            <div class="stat-info">
+                <h5>Среден рейтинг</h5>
+                <p>@Model.AverageRating.ToString("0.0")</p>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm p-3">
-                <h4>🏆 Най-популярен филм</h4>
-                <p class="fw-bold">@Model.TopMovie</p>
+        <div class="stat-card">
+            <div class="stat-icon bg-danger">
+                <i class="bi bi-trophy-fill"></i>
+            </div>
+            <div class="stat-info">
+                <h5>Най-популярен филм</h5>
+                <p>@Model.TopMovie</p>
             </div>
         </div>
     </div>
 
-    <div class="text-center mt-4">
-        <a class="btn btn-primary" href="/Home/Index">⬅ Обратно към началото</a>
+    <div class="text-center mt-5">
+        <a class="btn btn-outline-primary px-4 py-2" href="/Home/Index">
+            <i class="bi bi-arrow-left-circle"></i> Обратно към началото
+        </a>
     </div>
 </div>

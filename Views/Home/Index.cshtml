@@ -62,23 +62,35 @@
     <hr class="my-5" />
 
     <!-- 📊 Статистика -->
-    <h2 class="text-center text-info fw-bold mb-4">📊 Статистика</h2>
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <div class="movie-card text-center p-3">
-                <div class="movie-content">
-                    <ul class="list-group list-group-flush text-start">
-                        <li class="list-group-item">🎞️ Общо филми: <strong>@Model.Statistics.TotalMovies</strong></li>
-                        <li class="list-group-item">📝 Общо ревюта: <strong>@Model.Statistics.TotalReviews</strong></li>
-                        <li class="list-group-item">⭐ Среден рейтинг: <strong>@Model.Statistics.AverageRating.ToString("0.0")</strong></li>
-                        <li class="list-group-item">🏆 Най-популярен филм: <strong>@Model.Statistics.TopMovie</strong></li>
-                    </ul>
+    <div class="container my-5">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold">📊 Статистика на сайта</h3>
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <div class="stats-card-home text-center p-4">
+                <div class="stats-items">
+                    <div class="stat-item">
+                        <i class="bi bi-film text-primary"></i>
+                        <span>Общо филми:</span>
+                        <strong>@Model.Statistics.TotalMovies</strong>
+                    </div>
+                    <div class="stat-item">
+                        <i class="bi bi-chat-left-text text-success"></i>
+                        <span>Общо ревюта:</span>
+                        <strong>@Model.Statistics.TotalReviews</strong>
+                    </div>
+                    <div class="stat-item">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <span>Среден рейтинг:</span>
+                        <strong>@Model.Statistics.AverageRating.ToString("0.0")</strong>
+                    </div>
+                    <div class="stat-item">
+                        <i class="bi bi-trophy-fill text-danger"></i>
+                        <span>Най-популярен филм:</span>
+                        <strong>@Model.Statistics.TopMovie</strong>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<style>
-    
-</style>

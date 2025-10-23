@@ -360,3 +360,62 @@ body {
     background-color: #222; /* малко по-светъл черен/сив */
     color: #fff;
 }
+
+
+
+/* статистика на началната страница */
+.stats-card-home {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 420px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .stats-card-home:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+.stats-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 10px;
+    transition: background 0.25s ease;
+}
+
+    .stat-item:hover {
+        background: #eef3f7;
+    }
+
+    .stat-item i {
+        font-size: 1.4rem;
+        margin-right: 12px;
+    }
+
+    .stat-item span {
+        flex-grow: 1;
+        text-align: left;
+        color: #555;
+        font-size: 1rem;
+    }
+
+    .stat-item strong {
+        font-weight: 600;
+        color: #000;
+        font-size: 1.1rem;
+    }
+
+h3.fw-bold {
+    color: #222;
+}
