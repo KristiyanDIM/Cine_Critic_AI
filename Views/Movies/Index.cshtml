@@ -10,20 +10,21 @@
     <a asp-action="Create" class="btn btn-primary mb-3">➕ Добави нов филм</a>
 </p>
 
-<div class="movies-grid">
+<div class="movies-grid-new">
     @foreach (var movie in Model)
     {
-        <div class="movie-card">
-            <div class="movie-image">
-                <img src="@(!string.IsNullOrEmpty(movie.ImageUrl) ? movie.ImageUrl : "/images/default_poster.jpg")" alt="@movie.Title" />
+        <div class="movie-card-new">
+            <div class="movie-card-image">
+                <img src="@(!string.IsNullOrEmpty(movie.ImageUrl) ? movie.ImageUrl : "/images/default_poster.jpg")"
+                     alt="@movie.Title" />
             </div>
-            <div class="movie-content">
-                <h3>@movie.Title</h3>
+            <div class="movie-card-content">
+                <h3 class="movie-card-title">@movie.Title</h3>
                 <p><strong>Година:</strong> @movie.Year</p>
                 <p><strong>Жанр:</strong> @movie.Genre</p>
                 <p><strong>Режисьор:</strong> @movie.Director</p>
             </div>
-            <div class="movie-actions">
+            <div class="movie-card-actions">
                 <a asp-action="Details" asp-route-id="@movie.Id" class="btn btn-info btn-sm">Детайли</a>
                 <a asp-action="Edit" asp-route-id="@movie.Id" class="btn btn-warning btn-sm">Редактирай</a>
                 <a asp-action="Delete" asp-route-id="@movie.Id" class="btn btn-danger btn-sm">Изтрий</a>

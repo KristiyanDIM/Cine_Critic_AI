@@ -19,114 +19,181 @@ body {
     font-family: Roboto, sans-serif;
 }
 
-/* Sidebar контейнер */
-.main-head {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 70px; /* свита ширина */
-    background-color: #000; /* черен фон */
-    transition: width 0.3s;
+
+
+
+/* страница review - картичките на ревютата*/
+.reviews-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.review-card {
+    display: flex;
+    flex-direction: row;
+    background: #fff;
+    border-radius: 12px;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    z-index: 1000;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    width: 450px;
 }
 
-    /* Разгъване при hover */
-    .main-head:hover {
-        width: 220px; /* разгъната ширина */
+    .review-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.15);
     }
 
-/* Навигация вътре в sidebar */
-.head-nav {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding-top: 20px;
+.poster {
+    flex-shrink: 0;
+    width: 130px;
+    overflow: hidden;
 }
 
-.nav-links {
+    .poster img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.review-info {
+    padding: 12px 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+}
+
+    .review-info h4 {
+        margin: 0 0 6px 0;
+        font-size: 1.1rem;
+        color: #222;
+    }
+
+.rating-emotion {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+}
+
+.comment {
+    flex-grow: 1;
+    font-size: 0.95rem;
+    color: #555;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* до 3 реда */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 10px;
+}
+
+.buttons {
+    display: flex;
+    gap: 6px;
+}
+
+    .buttons .btn {
+        flex: 1;
+        font-size: 0.85rem;
+        padding: 5px 0;
+    }
+
+.btn-primary {
+    background-color: #4a90e2;
+    border-color: #4a90e2;
+    color: #fff;
+}
+
+.btn-warning {
+    background-color: #f5a623;
+    border-color: #f5a623;
+    color: #fff;
+}
+
+.btn-danger {
+    background-color: #d0021b;
+    border-color: #d0021b;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #357ab8;
+}
+
+.btn-warning:hover {
+    background-color: #d1871f;
+}
+
+.btn-danger:hover {
+    background-color: #a10015;
+}
+
+
+
+
+
+/*страница movies - картичките на филмите*/
+.movies-grid-new {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.movie-card-new {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
     display: flex;
     flex-direction: column;
 }
 
-.nav-link {
-    display: flex;
-    align-items: center;
-    color: #fff; /* бял текст */
-    text-decoration: none;
+    .movie-card-new:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+    }
+
+.movie-card-image img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+
+.movie-card-content {
     padding: 15px;
-    transition: background-color 0.3s, color 0.3s;
+    flex-grow: 1;
 }
 
-    /* Иконите остават на ляво */
-    .nav-link i {
-        font-size: 1.5rem;
-        min-width: 30px;
-        text-align: center;
+    .movie-card-content h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.25rem;
+        color: #222;
     }
 
-/* Текстът се показва само при разгъване */
-.link-text {
-    white-space: nowrap;
-    margin-left: 10px;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
+    .movie-card-content p {
+        margin: 4px 0;
+        color: #555;
+        font-size: 0.9rem;
+    }
 
-/* Показване на текста при hover на sidebar */
-.main-head:hover .link-text {
-    opacity: 1;
-}
-
-/* Hover ефект на отделен линк */
-.nav-link:hover {
-    background-color: #333; /* по-светъл черен / тъмно сив */
-    color: #fff;
-}
-
-/* Sidebar Footer */
-.user-footer {
-    margin-top: auto; /* винаги долу */
-    display: flex;
-    flex-direction: column;
-
-}
-
-/* Линк към профила */
-.user-link, .logout-link {
-    display: flex;
-    align-items: center;
-    color: #fff;
-    text-decoration: none;
+.movie-card-actions {
     padding: 15px;
-    transition: background 0.4s, color 0.4s;
+    display: flex;
+    justify-content: space-between;
 }
 
-    .user-link i, .logout-link i {
-        font-size: 1.5rem;
-        min-width: 30px;
-        text-align: center;
+    .movie-card-actions .btn {
+        flex: 1;
+        margin: 0 2px;
+        font-size: 0.85rem;
+        transition: all 0.2s;
     }
 
-    /* Показва текста само при hover/разгънат sidebar */
-    .user-name, .logout-link .link-text {
-        margin-left: 10px;
-        white-space: nowrap;
-        opacity: 0;
-        transition: opacity 0.4s;
-    }
-
-/* Когато sidebar се разгъне */
-.main-head:hover .user-name,
-.main-head:hover .logout-link .link-text {
-    opacity: 1;
-}
-
-/* Hover ефект (като горните линкове) */
-.user-link:hover, .logout-link:hover {
-    background-color: #222; /* малко по-светъл черен/сив */
-    color: #fff;
-}
+        .movie-card-actions .btn:hover {
+            opacity: 0.85;
+        }

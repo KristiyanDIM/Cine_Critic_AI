@@ -4,38 +4,41 @@
     ViewData["Title"] = "Ревюта";
 }
 
-<h2>@ViewData["Title"]</h2>
+<h2 class="text-center my-4">@ViewData["Title"]</h2>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">➕ Добави ново ревю</a>
-</p>
+<!-- Бутон за добавяне на ново ревю -->
+<div class="text-center mb-4">
+    <a asp-action="Create" class="btn btn-success btn-lg shadow-sm">
+        ➕ Добави ново ревю
+    </a>
+</div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Име на филм</th>
-            <th>Оценка</th>
-            <th>Коментар</th>
-            <th>Емоционален тон</th>
-            <th>Дата</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var review in Model)
-        {
-            <tr>
-				<td>@review.Movie?.Title</td>
-                <td>@review.Rate</td>
-                <td>@review.Comment</td>
-                <td>@review.EmotionTone</td>
-                <td>@review.Date.ToString("dd.MM.yyyy")</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@review.Id" class="btn btn-info btn-sm">Детайли</a> |
-                    <a asp-action="Edit" asp-route-id="@review.Id" class="btn btn-warning btn-sm">Редактирай</a> |
-                    <a asp-action="Delete" asp-route-id="@review.Id" class="btn btn-danger btn-sm">Изтрий</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="reviews-gallery">
+    @foreach (var review in Model)
+    {
+        <div class="review-card">
+            <!-- Лява част: мини постер на филма -->
+            <div class="poster">
+                <img src="@(!string.IsNullOrEmpty(review.Movie?.ImageUrl) ? review.Movie.ImageUrl : "/images/default_poster.jpg")" alt="@review.Movie?.Title" />
+            </div>
+
+            <!-- Дясна част: информация -->
+            <div class="review-info">
+                <h4>@review.Movie?.Title</h4>
+                <div class="rating-emotion">
+                    <span class="rating">⭐ @review.Rate/5</span>
+                    <span class="emotion">@review.EmotionTone ?? "неутрален"</span>
+                </div>
+                <p class="comment">@(!string.IsNullOrEmpty(review.Comment) ? review.Comment : "Няма коментар")</p>
+
+                <div class="buttons">
+                    <a asp-action="Details" asp-route-id="@review.Id" class="btn btn-sm btn-primary">Детайли</a>
+                    <a asp-action="Edit" asp-route-id="@review.Id" class="btn btn-sm btn-warning">Редактирай</a>
+                    <a asp-action="Delete" asp-route-id="@review.Id" class="btn btn-sm btn-danger">Изтрий</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+

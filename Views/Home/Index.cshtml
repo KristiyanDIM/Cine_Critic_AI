@@ -31,24 +31,32 @@
     <div class="row g-3 justify-content-center">
         @foreach (var review in Model.RandomReviews)
         {
-            <div class="col-lg-3 col-md-4 col-sm-6">
-                <div class="movie-card">
-                    <div class="movie-content">
-                        <h5>@review.Movie?.Title</h5>
-                        <p class="text-muted small">
-                            @(review.Comment != null && review.Comment.Length > 100
-                                                    ? review.Comment.Substring(0, 100) + "..."
-                                                    : review.Comment)
-                    </p>
-                    <p><strong>Емоция:</strong> @review.EmotionTone</p>
-                    <span class="badge bg-warning text-dark">⭐ @review.Rate / 5</span>
+            <div class="review-card-new">
+                <!-- Лява част: мини постер на филма -->
+                <div class="review-card-image">
+                    <img src="@(!string.IsNullOrEmpty(review.Movie?.ImageUrl) ? review.Movie.ImageUrl : "/images/default_poster.jpg")"
+                         alt="@review.Movie?.Title" />
                 </div>
-                <div class="movie-actions">
-                    <a asp-controller="Reviews" asp-action="Details" asp-route-id="@review.Id" class="btn btn-outline-secondary btn-sm">Прегледай</a>
+
+                <!-- Дясна част: информация -->
+                <div class="review-card-content">
+                    <h4 class="review-card-title">@review.Movie?.Title</h4>
+                    <div class="review-card-meta">
+                        <span class="review-card-rating">⭐ @review.Rate/5</span>
+                        <span class="review-card-emotion">@review.EmotionTone"</span>
+                    </div>
+                    <p class="review-card-comment">@(!string.IsNullOrEmpty(review.Comment) ? review.Comment : "Няма коментар")</p>
+
+                    <div class="review-card-buttons">
+                        <a asp-action="Details" asp-route-id="@review.Id" class="btn btn-sm btn-primary">Детайли</a>
+                        <a asp-action="Edit" asp-route-id="@review.Id" class="btn btn-sm btn-warning">Редактирай</a>
+                        <a asp-action="Delete" asp-route-id="@review.Id" class="btn btn-sm btn-danger">Изтрий</a>
+                    </div>
                 </div>
             </div>
-        </div>
-                }
+
+                
+        }
     </div>
 
     <hr class="my-5" />
@@ -71,3 +79,6 @@
     </div>
 </div>
 
+<style>
+    
+</style>
