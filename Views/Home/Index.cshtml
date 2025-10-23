@@ -1,74 +1,73 @@
-﻿@{
-    ViewData["Title"] = "Cine Critic AI - Начало";
-}
+﻿@model Cine_Critic_AI.Models.HomePageViewModel
 
-<div class="text-center mt-5">
-    <h1 class="display-4 fw-bold">🎬 Добре дошъл в <span class="text-primary">Cine Critic AI</span></h1>
-    <p class="lead mt-3">Мястото, където изкуственият интелект среща киното.</p>
-
-    <hr class="my-4" />
-
-    <div class="row mt-4">
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h5 class="card-title text-primary">🎥 Филми</h5>
-                    <p class="card-text">Разгледай нашата колекция от филми, режисьори и жанрове. Виж какво мислят другите зрители!</p>
-                    <a asp-controller="Movies" asp-action="Index" class="btn btn-outline-primary">Прегледай филми</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h5 class="card-title text-success">⭐ Ревюта</h5>
-                    <p class="card-text">Прочети или добави свои ревюта. Сподели мнението си и виж емоционалния анализ на AI!</p>
-                    <a asp-controller="Reviews" asp-action="Index" class="btn btn-outline-success">Виж ревюта</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <h5 class="card-title text-info">👤 @User.Identity.Name</h5>
-                        <p class="card-text">Добре дошъл в нашата филмова общност!</p>
-                        <a asp-controller="Account" asp-action="EditProfile" class="btn btn-outline-warning me-2">Редактирай профил</a>
-                        <a asp-controller="Account" asp-action="Logout" class="btn btn-outline-info">Изход</a>
-                    }
-                    else
-                    {
-                        <h5 class="card-title text-info">👤 Потребители</h5>
-                        <p class="card-text">Регистрирай се и се присъедини към нашата филмова общност!</p>
-                        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-info">Регистрация</a>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-body text-center">
-                        <h4 class="card-title mb-3">📊 Статистика</h4>
-                        <p class="card-text text-muted">
-                            Виж общите данни за ревюта, филми и средни рейтинги.
-                        </p>
-                        <a href="@Url.Action("Index", "Statistics")" class="btn btn-primary">
-                            Прегледай статистиката
-                        </a>
+<div class="container mt-5">
+    <!-- 🎬 Случайни филми -->
+    <h2 class="mb-4 text-center text-primary fw-bold">🎬 Препоръчани филми</h2>
+    <div class="row g-3 justify-content-center">
+        @foreach (var movie in Model.RandomMovies)
+        {
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="movie-card">
+                    <div class="movie-image">
+                        <img src="@(!string.IsNullOrEmpty(movie.ImageUrl) ? movie.ImageUrl : "/images/default_poster.jpg")" alt="@movie.Title" />
+                    </div>
+                    <div class="movie-content">
+                        <h5>@movie.Title</h5>
+                        <p><strong>Година:</strong> @movie.Year</p>
+                        <p><strong>Жанр:</strong> @movie.Genre</p>
+                    </div>
+                    <div class="movie-actions">
+                        <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.Id" class="btn btn-outline-primary btn-sm">Виж повече</a>
                     </div>
                 </div>
             </div>
-        </div>
+        }
     </div>
 
-    <div class="mt-5">
-        <p class="text-muted">© @DateTime.Now.Year Cine Critic AI — powered by ASP.NET Core MVC</p>
+    <hr class="my-5" />
+
+    <!-- 📝 Последни ревюта -->
+    <h2 class="mb-4 text-center text-success fw-bold">📝 Последни ревюта</h2>
+    <div class="row g-3 justify-content-center">
+        @foreach (var review in Model.RandomReviews)
+        {
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="movie-card">
+                    <div class="movie-content">
+                        <h5>@review.Movie?.Title</h5>
+                        <p class="text-muted small">
+                            @(review.Comment != null && review.Comment.Length > 100
+                                                    ? review.Comment.Substring(0, 100) + "..."
+                                                    : review.Comment)
+                    </p>
+                    <p><strong>Емоция:</strong> @review.EmotionTone</p>
+                    <span class="badge bg-warning text-dark">⭐ @review.Rate / 5</span>
+                </div>
+                <div class="movie-actions">
+                    <a asp-controller="Reviews" asp-action="Details" asp-route-id="@review.Id" class="btn btn-outline-secondary btn-sm">Прегледай</a>
+                </div>
+            </div>
+        </div>
+                }
+    </div>
+
+    <hr class="my-5" />
+
+    <!-- 📊 Статистика -->
+    <h2 class="text-center text-info fw-bold mb-4">📊 Статистика</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="movie-card text-center p-3">
+                <div class="movie-content">
+                    <ul class="list-group list-group-flush text-start">
+                        <li class="list-group-item">🎞️ Общо филми: <strong>@Model.Statistics.TotalMovies</strong></li>
+                        <li class="list-group-item">📝 Общо ревюта: <strong>@Model.Statistics.TotalReviews</strong></li>
+                        <li class="list-group-item">⭐ Среден рейтинг: <strong>@Model.Statistics.AverageRating.ToString("0.0")</strong></li>
+                        <li class="list-group-item">🏆 Най-популярен филм: <strong>@Model.Statistics.TopMovie</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
