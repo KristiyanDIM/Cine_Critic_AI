@@ -3,33 +3,114 @@
     ViewData["Title"] = "Вход";
 }
 
-<h2 class="text-center mb-4">Вход</h2>
+<div class="login-page">
+    <div class="login-card shadow-lg">
+        <div class="text-center mb-4">
+            <div class="login-icon">🎬</div>
+            <h2 class="fw-bold">Добре дошъл отново!</h2>
+            <p class="text-muted">Влез в профила си, за да продължиш</p>
+        </div>
 
-<div class="row justify-content-center">
-    <div class="col-md-5">
         <form asp-action="Login" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="mb-3">
-                <label asp-for="Username" class="form-label"></label>
-                <input asp-for="Username" class="form-control" />
+                <label asp-for="Username" class="form-label fw-semibold">Потребителско име</label>
+                <input asp-for="Username" class="form-control form-control-lg" placeholder="Въведете потребителско име" />
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" type="password" />
+            <div class="mb-4">
+                <label asp-for="Password" class="form-label fw-semibold">Парола</label>
+                <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="Въведете парола" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Вход</button>
+            <button type="submit" class="btn btn-primary w-100 py-2">🔐 Вход</button>
         </form>
 
         <div class="text-center mt-3">
-            <p>Нямаш акаунт? <a asp-action="Register">Регистрация</a></p>
+            <p>Нямаш акаунт? <a asp-action="Register" class="register-link">Регистрация</a></p>
         </div>
     </div>
 </div>
+
+<style>
+    /* Основен фон */
+    .login-page {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+    }
+
+    /* Карта на формата */
+    .login-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 40px 35px;
+        width: 100%;
+        max-width: 420px;
+        transition: all 0.3s ease-in-out;
+        animation: fadeInUp 0.7s ease-out;
+    }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+    /* Икона най-отгоре */
+    .login-icon {
+        font-size: 3rem;
+        background: linear-gradient(45deg, #4a90e2, #6a11cb);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+    }
+
+    /* Полета */
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        padding: 10px 15px;
+        transition: all 0.2s ease;
+    }
+
+        .form-control:focus {
+            border-color: #6a11cb;
+            box-shadow: 0 0 8px rgba(106,17,203,0.3);
+        }
+
+    /* Бутон */
+    .btn-primary {
+        background: linear-gradient(90deg, #6a11cb, #2575fc);
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .btn-primary:hover {
+            transform: scale(1.03);
+            opacity: 0.9;
+        }
+
+    /* Линк за регистрация */
+    .register-link {
+        color: #6a11cb;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .register-link:hover {
+            text-decoration: underline;
+        }
+
+    
+    
+</style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

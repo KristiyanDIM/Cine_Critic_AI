@@ -1,29 +1,120 @@
 ﻿@model Cine_Critic_AI.Models.EditProfileViewModel
 
-<h2>Редактиране на профил</h2>
+@{
+    ViewData["Title"] = "Редактиране на профил";
+}
 
-<form asp-action="EditProfile" method="post">
-    <div class="mb-3">
-        <label asp-for="Username" class="form-label"></label>
-        <input asp-for="Username" class="form-control" />
-        <span asp-validation-for="Username" class="text-danger"></span>
+<div class="edit-profile-page">
+    <div class="edit-profile-card shadow-lg">
+        <div class="text-center mb-4">
+            <div class="profile-icon">🎬</div>
+            <h2 class="fw-bold">Редактирай профила си</h2>
+            <p class="text-muted">Актуализирай потребителското си име или промени паролата си</p>
+        </div>
+
+        <form asp-action="EditProfile" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Username" class="form-label fw-semibold">Потребителско име</label>
+                <input asp-for="Username" class="form-control form-control-lg" placeholder="Въведи ново потребителско име" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="NewPassword" class="form-label fw-semibold">Нова парола</label>
+                <input asp-for="NewPassword" class="form-control form-control-lg" type="password" placeholder="Въведи нова парола" />
+                <span asp-validation-for="NewPassword" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="ConfirmPassword" class="form-label fw-semibold">Потвърди паролата</label>
+                <input asp-for="ConfirmPassword" class="form-control form-control-lg" type="password" placeholder="Повтори новата парола" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2">💾 Запази промените</button>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">⬅️ Откажи</a>
+        </form>
     </div>
+</div>
 
-    <div class="mb-3">
-        <label asp-for="NewPassword" class="form-label"></label>
-        <input asp-for="NewPassword" class="form-control" data-val="false" />
-        <span asp-validation-for="NewPassword" class="text-danger"></span>
-    </div>
+<style>
+    /* Основен контейнер */
+    .edit-profile-page {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        padding: 20px;
+    }
 
-    <div class="mb-3">
-        <label asp-for="ConfirmPassword" class="form-label"></label>
-        <input asp-for="ConfirmPassword" class="form-control" data-val="false" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-    </div>
+    /* Карта с формата */
+    .edit-profile-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 40px 35px;
+        width: 100%;
+        max-width: 450px;
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.7s ease-out;
+    }
 
-    <button type="submit" class="btn btn-primary">Запази промени</button>
-    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Откажи</a>
-</form>
+        .edit-profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+    /* Икона и заглавие */
+    .profile-icon {
+        font-size: 3rem;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+    }
+
+    /* Полета */
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        padding: 10px 15px;
+        transition: all 0.2s ease;
+    }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(118, 75, 162, 0.3);
+        }
+
+    /* Бутони */
+    .btn-primary {
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+        .btn-primary:hover {
+            transform: scale(1.03);
+            opacity: 0.9;
+        }
+
+    .btn-outline-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #f0f0f0;
+            transform: scale(1.02);
+        }
+
+    
+</style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
