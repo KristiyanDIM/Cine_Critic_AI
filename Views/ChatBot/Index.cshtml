@@ -1,0 +1,128 @@
+﻿@{
+    ViewData["Title"] = "AI Чат бот";
+}
+
+<div class="chat-container">
+    <div class="chat-card shadow-lg">
+        <h2 class="text-center mb-3">🤖 Cine Critic AI Бот</h2>
+        <p class="text-center text-muted">Попитай ме нещо за филми, актьори или ревюта!</p>
+
+        <div id="chat-box" class="chat-box">
+            <div class="bot-message">Здравей! Какво би искал да знаеш днес? 🎬</div>
+        </div>
+
+        <form id="chat-form" class="chat-input-area mt-3">
+            <input id="userMessage" type="text" class="form-control" placeholder="Напиши съобщение..." autocomplete="off" />
+            <button type="submit" class="btn btn-primary">Изпрати</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .chat-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 85vh;
+        padding: 40px;
+    }
+
+    .chat-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 25px;
+        width: 100%;
+        max-width: 700px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+
+    .chat-box {
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 15px;
+        background: #fafafa;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .user-message, .bot-message {
+        max-width: 80%;
+        padding: 10px 15px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .user-message {
+        background: #007bff;
+        color: #fff;
+        align-self: flex-end;
+    }
+
+    .bot-message {
+        background: #f1f1f1;
+        align-self: flex-start;
+    }
+
+    .chat-input-area {
+        display: flex;
+        gap: 10px;
+    }
+
+        .chat-input-area input {
+            flex: 1;
+            border-radius: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .chat-input-area button {
+            border-radius: 10px;
+            padding: 10px 20px;
+        }
+
+    
+</style>
+
+@section Scripts {
+    <script>
+        document.getElementById("chat-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const input = document.getElementById("userMessage");
+            const chatBox = document.getElementById("chat-box");
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // добави съобщението на потребителя
+            const userMsg = document.createElement("div");
+            userMsg.classList.add("user-message");
+            userMsg.textContent = message;
+            chatBox.appendChild(userMsg);
+
+            input.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // изпрати заявка към контролера
+            const response = await fetch("/ChatBot/Ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `userMessage=${encodeURIComponent(message)}`
+            });
+
+            const data = await response.json();
+
+            // покажи отговора на бота
+            const botMsg = document.createElement("div");
+            botMsg.classList.add("bot-message");
+            botMsg.textContent = data.response;
+            chatBox.appendChild(botMsg);
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    </script>
+}

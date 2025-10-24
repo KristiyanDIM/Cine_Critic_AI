@@ -16,6 +16,27 @@
 
 </head>
 
+
+<!-- Floating Chatbot Button -->
+<div id="chatbot-button">
+    <i class="bi bi-robot"></i>
+</div>
+
+<!-- Chat Window -->
+<div id="chatbot-window" class="hidden">
+    <div class="chat-header">
+        🤖 AI Чат Бот
+    </div>
+    <div class="chat-body" id="chat-messages">
+        <div class="bot-message">Здравей! Как мога да ти помогна днес?</div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Напиши съобщение..." />
+        <button id="chat-send"><i class="bi bi-send"></i></button>
+    </div>
+</div>
+
+
 <body>
         <div class="main-head">
             <nav class="head-nav">
@@ -30,8 +51,12 @@
                         <i class="fa-solid fa-pen-to-square"></i><span class="link-text">Reviews</span>
                     </a>
                     <a asp-controller="Statistics" asp-action="Index" class="nav-link">
-                    <i class="bi bi-graph-up-arrow"></i>
-                    <span class="link-text">Статистика</span>
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span class="link-text">Статистика</span>
+                    </a>
+                    <a asp-controller="ChatBot" asp-action="Index" class="nav-link">
+                        <i class="bi bi-robot"></i>
+                        <span class="link-text">AI Чат бот</span>
                     </a>
 
                     @if (User?.Identity == null || !User.Identity.IsAuthenticated)

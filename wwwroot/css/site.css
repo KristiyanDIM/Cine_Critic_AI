@@ -419,3 +419,112 @@ body {
 h3.fw-bold {
     color: #222;
 }
+
+/*чат бот */
+/* Floating Chatbot Button */
+#chatbot-button {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: #0d6efd;
+    color: white;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    z-index: 1000;
+}
+
+    #chatbot-button:hover {
+        background: #0b5ed7;
+        transform: scale(1.1);
+    }
+
+/* Chat Window */
+#chatbot-window {
+    position: fixed;
+    bottom: 100px;
+    right: 25px;
+    width: 320px;
+    height: 400px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1001;
+}
+
+    #chatbot-window.hidden {
+        display: none;
+    }
+
+.chat-header {
+    background: #0d6efd;
+    color: white;
+    padding: 10px 15px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-body {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background: #f8f9fa;
+}
+
+.chat-input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+    .chat-input-area input {
+        flex: 1;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        padding: 8px 12px;
+        outline: none;
+    }
+
+    .chat-input-area button {
+        background: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        height: 40px;
+        margin-left: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+
+        .chat-input-area button:hover {
+            background: #0b5ed7;
+        }
+
+.bot-message, .user-message {
+    background: #e9ecef;
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    width: fit-content;
+    max-width: 80%;
+}
+
+.user-message {
+    background: #0d6efd;
+    color: white;
+    align-self: flex-end;
+}
