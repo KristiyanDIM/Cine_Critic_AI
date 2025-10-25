@@ -74,7 +74,7 @@ namespace Cine_Critic_AI.Services
 
                 var result = sb.ToString().Trim().ToLower();
 
-                // 💡 по-гъвкаво търсене на ключови думи
+                //  по-гъвкаво търсене на ключови думи
                 if (Regex.IsMatch(result, @"позитив|положител", RegexOptions.IgnoreCase))
                     return "позитивен";
                 if (Regex.IsMatch(result, @"негатив|отрицател", RegexOptions.IgnoreCase))

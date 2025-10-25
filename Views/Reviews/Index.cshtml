@@ -27,7 +27,7 @@
                 <h4>@review.Movie?.Title</h4>
                 <div class="rating-emotion">
                     <span class="rating">⭐ @review.Rate/5</span>
-                    <span class="emotion">@review.EmotionTone ?? "неутрален"</span>
+                    <span class="emotion">@review.EmotionTone</span>
                 </div>
                 <p class="comment">@(!string.IsNullOrEmpty(review.Comment) ? review.Comment : "Няма коментар")</p>
 

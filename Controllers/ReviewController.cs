@@ -1,5 +1,6 @@
 ﻿using Cine_Critic_AI.Models;
 using Cine_Critic_AI.Services;
+using Cine_Critic_AI.Services.Factories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,6 +14,7 @@ namespace Cine_Critic_AI.Controllers
         private readonly DatabaseService _database;
         private readonly AppLoggerSingleton _appLogger;
         private readonly LocalAIService _ai;
+        private readonly IReviewFactory _reviewFactory;
 
         // Конструктор с Dependency Injection
         public ReviewsController(DatabaseService database, AppLoggerSingleton appLogger, LocalAIService ai)
@@ -20,6 +22,11 @@ namespace Cine_Critic_AI.Controllers
             _database = database;
             _appLogger = appLogger;
             _ai = ai;
+
+            // Избираш коя фабрика да използваш
+            _reviewFactory = new ManualReviewFactory(); 
+            _reviewFactory = new AIReviewFactory(_ai);
+
         }
 
         // GET: Reviews
@@ -144,11 +151,16 @@ namespace Cine_Critic_AI.Controllers
             var emotion = await _ai.ExtractEmotionFromTextAsync(generatedText);
             var rating = ExtractRatingFromText(generatedText ?? "");
 
+            var review = _reviewFactory.CreateReview(rating, generatedText, emotion);
+
+            _database.InsertReview(review);
+            _appLogger.Log($"Създадено ревю с фабрика (ID {review.Id})");
+
             return Json(new
             {
-                comment = generatedText ?? "",
-                emotion = emotion ?? "неутрален",
-                rate = rating > 0 ? rating : 3
+                comment = review.Comment,
+                emotion = review.EmotionTone,
+                rate = review.Rate
             });
         }
 

@@ -48,10 +48,17 @@
                     <p class="review-card-comment">@(!string.IsNullOrEmpty(review.Comment) ? review.Comment : "Няма коментар")</p>
 
                     <div class="review-card-buttons">
-                        <a asp-action="Details" asp-route-id="@review.Id" class="btn btn-sm btn-primary">Детайли</a>
-                        <a asp-action="Edit" asp-route-id="@review.Id" class="btn btn-sm btn-warning">Редактирай</a>
-                        <a asp-action="Delete" asp-route-id="@review.Id" class="btn btn-sm btn-danger">Изтрий</a>
+                        <a asp-controller="Reviews" asp-action="Details" asp-route-id="@review.Id" class="btn btn-sm btn-primary">
+                            Детайли
+                        </a>
+                        <a asp-controller="Reviews" asp-action="Edit" asp-route-id="@review.Id" class="btn btn-sm btn-warning">
+                            Редактирай
+                        </a>
+                        <a asp-controller="Reviews" asp-action="Delete" asp-route-id="@review.Id" class="btn btn-sm btn-danger">
+                            Изтрий
+                        </a>
                     </div>
+
                 </div>
             </div>
 
