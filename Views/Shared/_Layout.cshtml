@@ -10,94 +10,6 @@
     <link rel="stylesheet" href="~/css/customCSS.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <style>
-        /* Floating chat button */
-        #chatbot-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #007bff;
-            color: white;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 1000;
-        }
-
-        #chatbot-window {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 300px;
-            max-height: 400px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            z-index: 1000;
-        }
-
-            #chatbot-window.hidden {
-                display: none;
-            }
-
-        .chat-header {
-            background: #007bff;
-            color: white;
-            padding: 10px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-body {
-            flex: 1;
-            padding: 10px;
-            overflow-y: auto;
-            background: #f8f9fa;
-        }
-
-        .chat-input-area {
-            display: flex;
-            border-top: 1px solid #ccc;
-        }
-
-            .chat-input-area input {
-                flex: 1;
-                border: none;
-                padding: 10px;
-            }
-
-            .chat-input-area button {
-                border: none;
-                background: #007bff;
-                color: white;
-                padding: 0 15px;
-            }
-
-        .user-message {
-            background: #007bff;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 10px;
-            margin-bottom: 5px;
-            text-align: right;
-        }
-
-        .bot-message {
-            background: #f1f1f1;
-            padding: 5px 10px;
-            border-radius: 10px;
-            margin-bottom: 5px;
-        }
-    </style>
 </head>
 <body>
     <div class="main-head">
@@ -174,48 +86,47 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     <script>
-        const chatBtn = document.getElementById("chatbot-button");
-        const chatWindow = document.getElementById("chatbot-window");
-        const chatClose = document.getElementById("chatbot-close");
-        const chatSend = document.getElementById("chat-send");
-        const chatInput = document.getElementById("chat-input");
-        const chatMessages = document.getElementById("chat-messages");
+        document.addEventListener("DOMContentLoaded", function () {
+            const chatBtn = document.getElementById("chatbot-button");
+            const chatWindow = document.getElementById("chatbot-window");
+            const chatClose = document.getElementById("chatbot-close");
+            const chatSend = document.getElementById("chat-send");
+            const chatInput = document.getElementById("chat-input");
+            const chatMessages = document.getElementById("chat-messages");
 
-        const userId = @((HttpContextAccessor.HttpContext.Session.GetInt32("UserId") ?? 0));
+            const userId = @((HttpContextAccessor.HttpContext.Session.GetInt32("UserId") ?? 0));
 
-        chatBtn.addEventListener("click", () => chatWindow.classList.toggle("hidden"));
-        chatClose.addEventListener("click", () => chatWindow.classList.add("hidden"));
+            function sendMessage() {
+                const msg = chatInput.value.trim();
+                if (!msg) return;
 
-        async function sendMessage() {
-            const msg = chatInput.value.trim();
-            if (!msg) return;
+                chatMessages.innerHTML += `<div class="user-message">${msg}</div>`;
+                chatInput.value = "";
+                chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            chatMessages.innerHTML += `<div class="user-message">${msg}</div>`;
-            chatInput.value = "";
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            try {
-                const res = await fetch('@Url.Action("SendMessage", "ChatBot")', {
+                fetch('@Url.Action("SendMessage", "ChatBot")', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: `userMessage=${encodeURIComponent(msg)}&userId=${userId}`
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
+                })
+                .then(res => res.json())
+                .then(data => {
                     chatMessages.innerHTML += `<div class="bot-message">${data.response}</div>`;
-                } else {
-                    chatMessages.innerHTML += `<div class="bot-message text-danger">❌ Грешка при свързване с AI.</div>`;
-                }
-            } catch (e) {
-                chatMessages.innerHTML += `<div class="bot-message text-danger">⚠️ Грешка: ${e}</div>`;
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                })
+                .catch(err => {
+                    chatMessages.innerHTML += `<div class="bot-message text-danger">⚠️ Грешка: ${err}</div>`;
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                });
             }
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
 
-        chatSend.addEventListener("click", sendMessage);
-        chatInput.addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
+            chatBtn.addEventListener("click", () => chatWindow.classList.toggle("hidden"));
+            chatClose.addEventListener("click", () => chatWindow.classList.add("hidden"));
+            chatSend.addEventListener("click", sendMessage);
+            chatInput.addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
+        });
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

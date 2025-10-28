@@ -421,7 +421,7 @@ h3.fw-bold {
 }
 
 /*чат бот */
-/* Floating Chatbot Button *
+/* Floating Chatbot Button */
 #chatbot-button {
     position: fixed;
     bottom: 25px;
@@ -446,7 +446,7 @@ h3.fw-bold {
         transform: scale(1.1);
     }
 
-/* Chat Window *
+/* Chat Window */
 #chatbot-window {
     position: fixed;
     bottom: 100px;
@@ -463,7 +463,7 @@ h3.fw-bold {
 }
 
     #chatbot-window.hidden {
-        display: none;
+        display: none !important;
     }
 
 .chat-header {
