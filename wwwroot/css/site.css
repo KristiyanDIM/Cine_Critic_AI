@@ -511,9 +511,15 @@ h3.fw-bold {
         cursor: pointer;
     }
 
-        .chat-input-area button:hover {
-            background: #0b5ed7;
-        }
+#chat-send {
+    height: 40px;
+    padding: 20px;
+    border-radius: 50px;
+}
+
+.chat-input-area button:hover {
+    background: #0b5ed7;
+}
 
 .bot-message, .user-message {
     background: #e9ecef;
