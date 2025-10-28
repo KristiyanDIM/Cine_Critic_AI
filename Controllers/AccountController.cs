@@ -59,7 +59,7 @@ namespace Cine_Critic_AI.Controllers
                 IsPersistent = false, // ❗ няма да пази cookie след затваряне
                 ExpiresUtc = DateTime.UtcNow.AddSeconds(5), // валидност 5 секунди
                 AllowRefresh = false
-                //
+           
             };
 
             await HttpContext.SignInAsync(
