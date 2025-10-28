@@ -22,14 +22,17 @@ namespace Cine_Critic_AI.Controllers
             _appLogger = appLogger;
         }
 
+        // 🔹 LOGIN (GET)
         [HttpGet]
         public IActionResult Login() => View();
 
+        // 🔹 LOGIN (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return View(model);
 
             var user = _database.GetAllUsers()
                                 .FirstOrDefault(u => u.Username == model.Username);
@@ -50,18 +53,27 @@ namespace Cine_Critic_AI.Controllers
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var authProperties = new AuthenticationProperties { IsPersistent = false };
 
-            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                                    new ClaimsPrincipal(claimsIdentity), authProperties).Wait();
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = false, // ❗ няма да пази cookie след затваряне
+                ExpiresUtc = DateTime.UtcNow.AddSeconds(5), // валидност 5 секунди
+                AllowRefresh = false
+            };
 
-            // ⚡ Добавяме UserId и Username в Session за ChatBot
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+
+            // Запис в Session за ChatBot и други функции
             HttpContext.Session.SetInt32("UserId", user.Id);
             HttpContext.Session.SetString("Username", user.Username);
 
             return RedirectToAction("Index", "Home");
         }
 
+        // 🔹 EDIT PROFILE (GET)
         [Authorize]
         [HttpGet]
         public IActionResult EditProfile()
@@ -73,10 +85,11 @@ namespace Cine_Critic_AI.Controllers
             return View(new EditProfileViewModel { Username = user.Username });
         }
 
+        // 🔹 EDIT PROFILE (POST)
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EditProfile(EditProfileViewModel model)
+        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
         {
             var user = _database.GetAllUsers()
                                 .FirstOrDefault(u => u.Username == User.Identity.Name);
@@ -99,8 +112,9 @@ namespace Cine_Critic_AI.Controllers
                 new Claim(ClaimTypes.Email, user.Email)
             };
 
-            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                                    new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme))).Wait();
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)));
 
             HttpContext.Session.SetString("Username", user.Username);
 
@@ -108,31 +122,34 @@ namespace Cine_Critic_AI.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        // 🔹 LOGOUT
         [HttpGet]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            // Изчистване на Session
+            var username = User.Identity?.Name ?? "неизвестен";
+
             HttpContext.Session.Clear();
 
-            var username = User.Identity.Name;
-
-            // Изход от cookie-а
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).Wait();
+            // Изтриване на cookie-то
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            Response.Cookies.Delete(".AspNetCore.Cookies");
 
             _appLogger.Log($"Потребителят {username} се е излогнал.");
 
             return RedirectToAction("Index", "Home");
         }
 
-
+        // 🔹 REGISTER (GET)
         [HttpGet]
         public IActionResult Register() => View();
 
+        // 🔹 REGISTER (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return View(model);
 
             if (_database.GetAllUsers().Any(u => u.Username == model.Username))
             {

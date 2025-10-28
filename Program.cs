@@ -21,22 +21,28 @@ namespace CineCritic_AI
 
             // Authentication
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                {
-                    options.LoginPath = "/Account/Login"; // къде да се пренасочи, ако не е логнат
-                    options.LogoutPath = "/Account/Logout";
-                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // изход след 30 минути бездействие
-                    options.SlidingExpiration = true; // удължава живота на cookie при активност
-                });
+            .AddCookie(options =>
+            {
+            options.LoginPath = "/Account/Login";
+            options.LogoutPath = "/Account/Logout";
+            options.ExpireTimeSpan = TimeSpan.FromSeconds(5); // излиза от профила след 5 секунди след затварянето на браъзера
+            options.SlidingExpiration = false;
+            options.Cookie.IsEssential = true;
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            });
 
-            builder.Services.AddHttpContextAccessor();
-            builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30); // излиза от профила след 30 минути бездействие
+                options.IdleTimeout = TimeSpan.FromSeconds(5); // излиза от профила след 5 секунди след затварянето на браъзера
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddDistributedMemoryCache();
+            
 
             var app = builder.Build();
 

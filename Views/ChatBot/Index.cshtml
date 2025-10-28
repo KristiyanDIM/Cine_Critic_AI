@@ -3,8 +3,8 @@
 
 @{
     ViewData["Title"] = "AI Чат бот";
-    
-    var chatMessages = Model ?? new List<Cine_Critic_AI.Models.ChatMessage>();
+    var userName = User.Identity?.Name;
+    var isLoggedIn = User.Identity?.IsAuthenticated ?? false;
 }
 
 <div class="chat-card shadow-lg">
@@ -26,7 +26,7 @@
     <button id="clearChatBtn" class="btn btn-danger mb-2">Изчисти чата</button>
 
     <div id="chat-box" class="chat-box">
-        @foreach (var msg in chatMessages)
+        @foreach (var msg in Model)
         {
             var cssClass = msg.Sender == "User" ? "user-message" : "bot-message";
             <div class="@cssClass">@msg.Message</div>
