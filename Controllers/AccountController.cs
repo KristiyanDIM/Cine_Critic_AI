@@ -50,7 +50,7 @@ namespace Cine_Critic_AI.Controllers
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var authProperties = new AuthenticationProperties { IsPersistent = true };
+            var authProperties = new AuthenticationProperties { IsPersistent = false };
 
             HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                                     new ClaimsPrincipal(claimsIdentity), authProperties).Wait();
@@ -111,16 +111,19 @@ namespace Cine_Critic_AI.Controllers
         [HttpGet]
         public IActionResult Logout()
         {
-            var username = User.Identity.Name;
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).Wait();
-
             // Изчистване на Session
             HttpContext.Session.Clear();
+
+            var username = User.Identity.Name;
+
+            // Изход от cookie-а
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).Wait();
 
             _appLogger.Log($"Потребителят {username} се е излогнал.");
 
             return RedirectToAction("Index", "Home");
         }
+
 
         [HttpGet]
         public IActionResult Register() => View();

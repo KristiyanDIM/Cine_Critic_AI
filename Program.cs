@@ -1,5 +1,6 @@
 ﻿using Cine_Critic_AI.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Net;
 
 namespace CineCritic_AI
 {
@@ -22,21 +23,26 @@ namespace CineCritic_AI
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = "/Account/Login";
+                    options.LoginPath = "/Account/Login"; // къде да се пренасочи, ако не е логнат
                     options.LogoutPath = "/Account/Logout";
-                    options.ExpireTimeSpan = TimeSpan.FromHours(1);
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // изход след 30 минути бездействие
+                    options.SlidingExpiration = true; // удължава живота на cookie при активност
                 });
 
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // излиза от профила след 30 минути бездействие
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
 
             var app = builder.Build();
+
+            // Middleware за Session и Authentication
+            app.UseStaticFiles();
+            app.UseRouting();
 
             if (!app.Environment.IsDevelopment())
             {
