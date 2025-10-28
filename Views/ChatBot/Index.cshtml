@@ -1,21 +1,42 @@
-﻿@{
+﻿@model List<Cine_Critic_AI.Models.ChatMessage>
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
     ViewData["Title"] = "AI Чат бот";
+    
+    var chatMessages = Model ?? new List<Cine_Critic_AI.Models.ChatMessage>();
 }
 
-<div class="chat-container">
-    <div class="chat-card shadow-lg">
-        <h2 class="text-center mb-3">🤖 Cine Critic AI Бот</h2>
-        <p class="text-center text-muted">Попитай ме нещо за филми, актьори или ревюта!</p>
+<div class="chat-card shadow-lg">
+    <h2 class="text-center mb-3">🤖 Cine Critic AI Бот</h2>
 
-        <div id="chat-box" class="chat-box">
-            <div class="bot-message">🎬 Здравей! Какво би искал да знаеш днес?</div>
-        </div>
+    @if (HttpContextAccessor.HttpContext.Session.GetInt32("UserId") > 0)
+    {
+        <p class="text-center text-muted">
+            Здравей, <strong>@HttpContextAccessor.HttpContext.Session.GetString("Username")</strong>!
+        </p>
+    }
+    else
+    {
+        <p class="text-center text-muted">
+            Моля, влез в системата, за да използваш чата.
+        </p>
+    }
 
-        <form id="chat-form" class="chat-input-area mt-3">
-            <input id="userMessage" type="text" class="form-control" placeholder="Напиши съобщение..." autocomplete="off" />
-            <button type="submit" id="sendBtn" class="btn btn-primary">Изпрати</button>
-        </form>
+    <button id="clearChatBtn" class="btn btn-danger mb-2">Изчисти чата</button>
+
+    <div id="chat-box" class="chat-box">
+        @foreach (var msg in chatMessages)
+        {
+            var cssClass = msg.Sender == "User" ? "user-message" : "bot-message";
+            <div class="@cssClass">@msg.Message</div>
+        }
     </div>
+
+    <form id="chat-form" class="chat-input-area mt-3">
+        <input id="userMessage" type="text" class="form-control" placeholder="Напиши съобщение..." autocomplete="off" />
+        <button type="submit" class="btn btn-primary">Изпрати</button>
+    </form>
 </div>
 
 <style>
@@ -54,7 +75,6 @@
         padding: 10px 15px;
         border-radius: 12px;
         font-size: 0.95rem;
-        animation: fadeIn 0.3s ease;
         word-break: break-word;
     }
 
@@ -91,54 +111,64 @@
             border-radius: 10px;
             padding: 10px 20px;
         }
-
 </style>
 
 @section Scripts {
     <script>
+        const userId = @((HttpContextAccessor.HttpContext.Session.GetInt32("UserId") ?? 0));
         const form = document.getElementById("chat-form");
         const input = document.getElementById("userMessage");
         const chatBox = document.getElementById("chat-box");
+        const clearBtn = document.getElementById("clearChatBtn");
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
+        if(form){
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const message = input.value.trim();
+                if (!message) return;
 
-            const message = input.value.trim();
-            if (!message) return;
+                const userDiv = document.createElement("div");
+                userDiv.className = "user-message";
+                userDiv.textContent = message;
+                chatBox.appendChild(userDiv);
+                input.value = "";
 
-            // Показваме съобщението на потребителя безопасно
-            const userDiv = document.createElement("div");
-            userDiv.className = "user-message";
-            userDiv.textContent = message;
-            chatBox.appendChild(userDiv);
+                try {
+                    const res = await fetch('@Url.Action("SendMessage", "ChatBot")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `userMessage=${encodeURIComponent(message)}&userId=${userId}`
+                    });
 
-            input.value = "";
+                    const data = await res.json();
+                    const botDiv = document.createElement("div");
+                    botDiv.className = "bot-message";
+                    botDiv.textContent = data.response;
+                    chatBox.appendChild(botDiv);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                } catch {
+                    const errorDiv = document.createElement("div");
+                    errorDiv.className = "bot-message";
+                    errorDiv.textContent = "⚠️ Грешка при свързване с AI.";
+                    chatBox.appendChild(errorDiv);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+            });
+        }
 
-            try {
-                const res = await fetch('@Url.Action("SendMessage", "ChatBot")', {
+        if(clearBtn){
+            clearBtn.addEventListener("click", async () => {
+                if (!confirm("Сигурни ли сте, че искате да изчистите чата?")) return;
+
+                await fetch('@Url.Action("ClearChat", "ChatBot")', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `userMessage=${encodeURIComponent(message)}`
+                    body: `userId=${userId}`
                 });
 
-                const data = await res.json();
-
-                // Показваме отговора на бота безопасно
-                const botDiv = document.createElement("div");
-                botDiv.className = "bot-message";
-                botDiv.textContent = data.response;
-                chatBox.appendChild(botDiv);
-
-                // Скрол до най-новото съобщение
-                chatBox.scrollTop = chatBox.scrollHeight;
-
-            } catch (err) {
-                const errorDiv = document.createElement("div");
-                errorDiv.className = "bot-message";
-                errorDiv.textContent = "⚠️ Грешка при свързване с AI.";
-                chatBox.appendChild(errorDiv);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
-        });
+                chatBox.innerHTML = "";
+            });
+        }
     </script>
+
 }

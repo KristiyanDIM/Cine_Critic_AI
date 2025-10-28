@@ -10,12 +10,11 @@ using System.Security.Claims;
 namespace Cine_Critic_AI.Controllers
 {
     public class AccountController : Controller
-    {   
-        private readonly DatabaseService _database; // Singleton DAO
+    {
+        private readonly DatabaseService _database;
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly AppLoggerSingleton _appLogger;
 
-        // Конструктор с Dependency Injection
         public AccountController(DatabaseService database, AppLoggerSingleton appLogger)
         {
             _database = database;
@@ -32,17 +31,16 @@ namespace Cine_Critic_AI.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            // Използваме DAO за достъп до потребители
             var user = _database.GetAllUsers()
                                 .FirstOrDefault(u => u.Username == model.Username);
 
-            if (user == null || _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password) == PasswordVerificationResult.Failed)
+            if (user == null ||
+                _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password) == PasswordVerificationResult.Failed)
             {
                 ModelState.AddModelError("", "Невалидно потребителско име или парола.");
                 return View(model);
             }
 
-            // Логваме успешното влизане чрез Singleton Logger
             _appLogger.Log($"Потребителят {user.Username} се логна успешно.");
 
             var claims = new List<Claim>
@@ -56,6 +54,10 @@ namespace Cine_Critic_AI.Controllers
 
             HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                                     new ClaimsPrincipal(claimsIdentity), authProperties).Wait();
+
+            // ⚡ Добавяме UserId и Username в Session за ChatBot
+            HttpContext.Session.SetInt32("UserId", user.Id);
+            HttpContext.Session.SetString("Username", user.Username);
 
             return RedirectToAction("Index", "Home");
         }
@@ -86,12 +88,11 @@ namespace Cine_Critic_AI.Controllers
             if (!string.IsNullOrEmpty(model.NewPassword))
                 user.Password = _passwordHasher.HashPassword(user, model.NewPassword);
 
-            // Записване на промените в Singleton DatabaseService
             _database.UpdateUser(user);
 
-            // Логваме обновлението на профила чрез Singleton Logger
             _appLogger.Log($"Потребителят {user.Username} е обновил профила си.");
 
+            // Обновяване на claims и session
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
@@ -100,6 +101,8 @@ namespace Cine_Critic_AI.Controllers
 
             HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                                     new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme))).Wait();
+
+            HttpContext.Session.SetString("Username", user.Username);
 
             TempData["Success"] = "Профилът е успешно обновен!";
             return RedirectToAction("Index", "Home");
@@ -110,6 +113,9 @@ namespace Cine_Critic_AI.Controllers
         {
             var username = User.Identity.Name;
             HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).Wait();
+
+            // Изчистване на Session
+            HttpContext.Session.Clear();
 
             _appLogger.Log($"Потребителят {username} се е излогнал.");
 
@@ -147,7 +153,6 @@ namespace Cine_Critic_AI.Controllers
 
             _database.InsertUser(user);
 
-            // Логваме регистрацията на нов потребител
             _appLogger.Log($"Ново регистриран потребител: {user.Username}");
 
             TempData["Success"] = "Регистрацията е успешна! Влез в профила си.";

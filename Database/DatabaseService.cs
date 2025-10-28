@@ -52,6 +52,13 @@ namespace Cine_Critic_AI.Services
                 EmotionTone TEXT,
                 Date TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS ChatMessages(
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                UserId INTEGER NOT NULL,
+                Sender TEXT NOT NULL,   -- 'User' или 'Bot'
+                Message TEXT NOT NULL,
+                Timestamp TEXT NOT NULL DEFAULT (datetime('now'))
+            );
             ";
             cmd.ExecuteNonQuery();
 
@@ -382,5 +389,61 @@ namespace Cine_Critic_AI.Services
             }
             return null;
         }
+
+        // ================== CHAT MESSAGES INSERT ==================
+        public void InsertChatMessage(ChatMessage msg)
+        {
+            using var conn = new SqliteConnection(_connectionString);
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+        INSERT INTO ChatMessages (UserId, Sender, Message, Timestamp)
+        VALUES (@UserId, @Sender, @Message, @Timestamp)";
+            cmd.Parameters.AddWithValue("@UserId", msg.UserId);
+            cmd.Parameters.AddWithValue("@Sender", msg.Sender);
+            cmd.Parameters.AddWithValue("@Message", msg.Message);
+            cmd.Parameters.AddWithValue("@Timestamp", msg.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"));
+            cmd.ExecuteNonQuery();
+        }
+
+
+        // ================== CHAT MESSAGES GET ==================
+        public List<ChatMessage> GetChatMessagesByUser(int userId)
+        {
+            var messages = new List<ChatMessage>();
+            using var conn = new SqliteConnection(_connectionString);
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT * FROM ChatMessages WHERE UserId = @UserId ORDER BY Timestamp";
+            cmd.Parameters.AddWithValue("@UserId", userId);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                messages.Add(new ChatMessage
+                {
+                    Id = Convert.ToInt32(reader["Id"]),
+                    UserId = Convert.ToInt32(reader["UserId"]),
+                    Sender = reader["Sender"].ToString(),
+                    Message = reader["Message"].ToString(),
+                    Timestamp = DateTime.Parse(reader["Timestamp"].ToString())
+                });
+            }
+            return messages;
+        }
+
+        // ================== CHAT MESSAGES DELETE ==================
+        public void ClearChatByUser(int userId)
+        {
+            using var conn = new SqliteConnection(_connectionString);
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "DELETE FROM ChatMessages WHERE UserId = @UserId";
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.ExecuteNonQuery();
+        }
+
+
+
     }
 }

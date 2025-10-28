@@ -18,7 +18,6 @@ namespace CineCritic_AI
             builder.Services.AddSingleton(AppLoggerSingleton.Instance);
             builder.Services.AddHttpClient<LocalAIService>();
 
-
             // Authentication
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -27,7 +26,16 @@ namespace CineCritic_AI
                     options.LogoutPath = "/Account/Logout";
                     options.ExpireTimeSpan = TimeSpan.FromHours(1);
                 });
-           
+
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
             var app = builder.Build();
 
             if (!app.Environment.IsDevelopment())
@@ -41,6 +49,7 @@ namespace CineCritic_AI
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseSession();
 
             app.MapControllerRoute(
                 name: "default",
