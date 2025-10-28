@@ -3,11 +3,11 @@
 
 @{
     ViewData["Title"] = "AI Чат бот";
-    
+
     var chatMessages = Model ?? new List<Cine_Critic_AI.Models.ChatMessage>();
 }
 
-<div class="ai-chat-wrapper shadow-lg">
+<div class="chat-card shadow-lg">
     <h2 class="text-center mb-3">🤖 Cine Critic AI Бот</h2>
 
     @if (HttpContextAccessor.HttpContext.Session.GetInt32("UserId") > 0)
@@ -23,121 +23,113 @@
         </p>
     }
 
-    <button id="clearChatBtn" class="btn btn-danger mb-2">🧹 Изчисти чата</button>
+    <button id="clearChatBtn" class="btn btn-danger mb-2">Изчисти чата</button>
 
     <div id="chat-box" class="chat-box">
         @foreach (var msg in chatMessages)
         {
-            var cssClass = msg.Sender == "User" ? "ai-msg-user" : "ai-msg-bot";
+            var cssClass = msg.Sender == "User" ? "user-message" : "bot-message";
             <div class="@cssClass">@msg.Message</div>
         }
     </div>
 
-    <form id="ai-chat-form" class="ai-input-section mt-3">
-        <input id="ai-user-input" type="text" class="form-control" placeholder="Напиши съобщение..." autocomplete="off" />
+    <form id="chat-form" class="chat-input-area mt-3">
+        <input id="userMessage" type="text" class="form-control" placeholder="Напиши съобщение..." autocomplete="off" />
         <button type="submit" class="btn btn-primary">Изпрати</button>
     </form>
 </div>
 
 <style>
-    /* Контейнер */
-    .ai-chat-wrapper {
-        background: #fff;
-        border-radius: 18px;
-        padding: 25px;
-        width: 100%;
-        max-width: 720px;
-        margin: 40px auto;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    .chat-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 85vh;
+        padding: 40px;
     }
 
-    /* Кутията за съобщения */
-    .ai-chat-box {
-        height: 420px;
+    .chat-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 25px;
+        width: 100%;
+        max-width: 700px;
+        justify-self: center;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+
+    .chat-box {
+        height: 400px;
         overflow-y: auto;
         border: 1px solid #e0e0e0;
-        border-radius: 12px;
+        border-radius: 10px;
         padding: 15px;
-        background: #fdfdfd;
+        background: #fafafa;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         scroll-behavior: smooth;
     }
 
-    /* Съобщения */
-    .ai-msg-user, .ai-msg-bot {
+    .user-message, .bot-message {
         max-width: 80%;
         padding: 10px 15px;
-        border-radius: 14px;
+        border-radius: 12px;
         font-size: 0.95rem;
-        line-height: 1.4;
         word-break: break-word;
-        transition: all 0.2s ease;
     }
 
-    .ai-msg-user {
+    .user-message {
         background: #007bff;
         color: #fff;
         align-self: flex-end;
-        border-bottom-right-radius: 4px;
     }
 
-    .ai-msg-bot {
+    .bot-message {
         background: #f1f1f1;
-        color: #333;
         align-self: flex-start;
-        border-bottom-left-radius: 4px;
     }
 
-    /* Полето за въвеждане */
-    .ai-input-section {
+    .chat-input-area {
         display: flex;
         gap: 10px;
     }
 
-        .ai-input-section input {
+        .chat-input-area input {
             flex: 1;
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 10px;
             border: 1px solid #ccc;
-            transition: box-shadow 0.2s ease;
         }
 
-            .ai-input-section input:focus {
+            .chat-input-area input:focus {
                 outline: none;
                 border-color: #007bff;
-                box-shadow: 0 0 6px rgba(0,123,255,0.4);
+                box-shadow: 0 0 5px rgba(0,123,255,0.5);
             }
 
-        .ai-input-section button {
-            border-radius: 12px;
+        .chat-input-area button {
+            border-radius: 10px;
             padding: 10px 20px;
-            font-weight: 600;
-            transition: transform 0.2s ease;
         }
-
-            .ai-input-section button:hover {
-                transform: scale(1.05);
-            }
 </style>
 
 @section Scripts {
     <script>
         const userId = @((HttpContextAccessor.HttpContext.Session.GetInt32("UserId") ?? 0));
-        const form = document.getElementById("ai-chat-form");
-        const input = document.getElementById("ai-user-input");
-        const chatBox = document.getElementById("ai-chat-box");
+        const form = document.getElementById("chat-form");
+        const input = document.getElementById("userMessage");
+        const chatBox = document.getElementById("chat-box");
         const clearBtn = document.getElementById("clearChatBtn");
 
-        if (form) {
+        if(form){
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
                 const message = input.value.trim();
                 if (!message) return;
 
                 const userDiv = document.createElement("div");
-                userDiv.className = "ai-msg-user";
+                userDiv.className = "user-message";
                 userDiv.textContent = message;
                 chatBox.appendChild(userDiv);
                 input.value = "";
@@ -151,13 +143,13 @@
 
                     const data = await res.json();
                     const botDiv = document.createElement("div");
-                    botDiv.className = "ai-msg-bot";
+                    botDiv.className = "bot-message";
                     botDiv.textContent = data.response;
                     chatBox.appendChild(botDiv);
                     chatBox.scrollTop = chatBox.scrollHeight;
                 } catch {
                     const errorDiv = document.createElement("div");
-                    errorDiv.className = "ai-msg-bot";
+                    errorDiv.className = "bot-message";
                     errorDiv.textContent = "⚠️ Грешка при свързване с AI.";
                     chatBox.appendChild(errorDiv);
                     chatBox.scrollTop = chatBox.scrollHeight;
@@ -165,7 +157,7 @@
             });
         }
 
-        if (clearBtn) {
+        if(clearBtn){
             clearBtn.addEventListener("click", async () => {
                 if (!confirm("Сигурни ли сте, че искате да изчистите чата?")) return;
 
@@ -179,4 +171,5 @@
             });
         }
     </script>
+
 }
