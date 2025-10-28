@@ -1,5 +1,6 @@
 ﻿using Cine_Critic_AI.Models;
 using Cine_Critic_AI.Services;
+using Cine_Critic_AI.Services.ChatStrategies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -43,50 +44,38 @@ namespace Cine_Critic_AI.Controllers
             if (string.IsNullOrWhiteSpace(userMessage))
                 return Json(new { response = "Моля, попитай нещо за филми 🎬" });
 
-            try
+            var userChatMessage = new ChatMessage
             {
-                // 1️⃣ Записваме съобщението на потребителя
-                var userChatMessage = new ChatMessage
-                {
-                    UserId = userId,
-                    Sender = "User",
-                    Message = userMessage.Trim(),
-                    Timestamp = DateTime.Now
-                };
-                DatabaseService.Instance.InsertChatMessage(userChatMessage);
+                UserId = userId,
+                Sender = "User",
+                Message = userMessage.Trim(),
+                Timestamp = DateTime.Now
+            };
+            DatabaseService.Instance.InsertChatMessage(userChatMessage);
 
-                // 2️⃣ Подготвяме prompt за AI
-                var json = JsonSerializer.Serialize(new
-                {
-                    model = "llama3",
-                    prompt = $"Ти си AI филмов критик. Отговаряй само на въпроси за филми, актьори, режисьори или ревюта. " +
-                             $"Ако въпросът не е за кино, кажи 'Говоря само за кино.'\n\nПотребител: {userMessage}"
-                });
+            // 🔹 Избор на стратегия
+            var chatContext = new ChatContext();
+            if (userMessage.Contains("препоръчвай", StringComparison.OrdinalIgnoreCase))
+                chatContext.SetStrategy(new RecommendationStrategy());
+            else if (userMessage.Contains("оцени", StringComparison.OrdinalIgnoreCase))
+                chatContext.SetStrategy(new RatingStrategy());
+            else
+                chatContext.SetStrategy(new AnalysisStrategy());
 
-                // 3️⃣ Изпращаме към AI
-                var responseText = await _ai.PostToOllamaAsync(json);
-                responseText = string.IsNullOrWhiteSpace(responseText)
-                    ? "⚠️ AI не върна отговор."
-                    : responseText;
+            // 🔹 Изпълнение на стратегия
+            string responseText = await chatContext.ExecuteStrategy(userMessage, userId, _ai);
+            responseText = string.IsNullOrWhiteSpace(responseText) ? "⚠️ AI не върна отговор." : responseText;
 
-                // 4️⃣ Записваме отговора на бота
-                var botChatMessage = new ChatMessage
-                {
-                    UserId = userId,
-                    Sender = "Bot",
-                    Message = responseText,
-                    Timestamp = DateTime.Now
-                };
-                DatabaseService.Instance.InsertChatMessage(botChatMessage);
-
-                // 5️⃣ Връщаме отговора като JSON
-                return Json(new { response = responseText });
-            }
-            catch (Exception ex)
+            var botChatMessage = new ChatMessage
             {
-                Console.WriteLine($"❌ Chat AI error: {ex.Message}");
-                return Json(new { response = "⚠️ Грешка при свързване с AI." });
-            }
+                UserId = userId,
+                Sender = "Bot",
+                Message = responseText,
+                Timestamp = DateTime.Now
+            };
+            DatabaseService.Instance.InsertChatMessage(botChatMessage);
+
+            return Json(new { response = responseText });
         }
 
 
