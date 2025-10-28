@@ -118,5 +118,82 @@ namespace Cine_Critic_AI.Services
 
             return sb.ToString().Trim();
         }
+
+        public async Task<string> PostToOllamaAsync(string json)
+        {
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Post, "api/generate")
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
+                };
+
+                using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+                response.EnsureSuccessStatusCode();
+
+                var sb = new StringBuilder();
+
+                using var stream = await response.Content.ReadAsStreamAsync();
+                using var reader = new StreamReader(stream);
+
+                string? line;
+                while ((line = await reader.ReadLineAsync()) != null)
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(line);
+                        if (doc.RootElement.TryGetProperty("response", out var resp))
+                        {
+                            sb.Append(resp.GetString());
+                        }
+                    }
+                    catch
+                    {
+                        // Ако някой ред не е JSON, го игнорираме
+                    }
+                }
+
+                var result = sb.ToString().Trim();
+                return string.IsNullOrWhiteSpace(result) ? "⚠️ AI не върна отговор." : result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Ollama Error: {ex.Message}");
+                return $"⚠️ Грешка при комуникация с AI: {ex.Message}";
+            }
+        }
+
+
+
+
+        public async Task<string> AskAIAsync(string prompt)
+        {
+            var json = JsonSerializer.Serialize(new
+            {
+                model = "llama3",
+                prompt = prompt
+            });
+
+            var response = await _http.PostAsync("api/generate", new StringContent(json, Encoding.UTF8, "application/json"));
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var sb = new StringBuilder();
+            foreach (var line in lines)
+            {
+                var doc = JsonDocument.Parse(line);
+                if (doc.RootElement.TryGetProperty("response", out var resp))
+                    sb.Append(resp.GetString());
+            }
+
+            return sb.ToString().Trim();
+        }
+
+
     }
 }
