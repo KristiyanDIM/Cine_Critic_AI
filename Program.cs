@@ -25,7 +25,7 @@ namespace CineCritic_AI
             {
             options.LoginPath = "/Account/Login";
             options.LogoutPath = "/Account/Logout";
-            options.ExpireTimeSpan = TimeSpan.FromSeconds(5); // излиза от профила след 5 секунди след затварянето на браъзера
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(20); // излиза от профила след 20 min след затварянето на браъзера
             options.SlidingExpiration = false;
             options.Cookie.IsEssential = true;
             options.Cookie.HttpOnly = true;
@@ -35,7 +35,7 @@ namespace CineCritic_AI
 
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromSeconds(5); // излиза от профила след 5 секунди след затварянето на браъзера
+                options.IdleTimeout = TimeSpan.FromMinutes(20); // излиза от профила след 20 min след затварянето на браъзера
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
