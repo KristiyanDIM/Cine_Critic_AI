@@ -121,17 +121,148 @@
             background-color: #e2e6ea;
             transform: scale(1.03);
         }
+
+
+    /* 🌀 AI Loader стил — твоята версия */
+    #aiLoader {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .dot-loader {
+        --uib-size: 40px;
+        --uib-color: #4a90e2;
+        --uib-speed: 1.5s;
+        --dot-size: calc(var(--uib-size) * 0.17);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        height: var(--uib-size);
+        width: var(--uib-size);
+        margin: 0 auto;
+        animation: smoothRotate calc(var(--uib-speed) * 1.8) linear infinite;
+    }
+
+    .dot {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        animation: rotate var(--uib-speed) ease-in-out infinite;
+    }
+
+        .dot::before {
+            content: '';
+            height: var(--dot-size);
+            width: var(--dot-size);
+            border-radius: 50%;
+            background-color: var(--uib-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .dot:nth-child(2),
+        .dot:nth-child(2)::before {
+            animation-delay: calc(var(--uib-speed) * -0.835 * 0.5);
+        }
+
+        .dot:nth-child(3),
+        .dot:nth-child(3)::before {
+            animation-delay: calc(var(--uib-speed) * -0.668 * 0.5);
+        }
+
+        .dot:nth-child(4),
+        .dot:nth-child(4)::before {
+            animation-delay: calc(var(--uib-speed) * -0.501 * 0.5);
+        }
+
+        .dot:nth-child(5),
+        .dot:nth-child(5)::before {
+            animation-delay: calc(var(--uib-speed) * -0.334 * 0.5);
+        }
+
+        .dot:nth-child(6),
+        .dot:nth-child(6)::before {
+            animation-delay: calc(var(--uib-speed) * -0.167 * 0.5);
+        }
+
+    @@keyframes rotate {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    65%, 100% {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    @@keyframes smoothRotate {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    .thinking-text {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 10px;
+        font-style: italic;
+    }
 </style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        document.getElementById("aiButton").addEventListener("click", async function () {
-            const rate = document.getElementById("rateInput").value;
-            if (!rate) { alert("Моля, въведи оценка."); return; }
+            const aiButton = document.getElementById("aiButton");
+        const rateInput = document.getElementById("rateInput");
+        const commentInput = document.getElementById("commentInput");
+        const toneInput = document.getElementById("toneInput");
+
+        // ⚙️ Създаваме контейнера с твоята анимация
+        const loader = document.createElement("div");
+        loader.id = "aiLoader";
+        loader.innerHTML = `
+            <div class="dot-loader">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <p class="thinking-text">AI мисли...</p>
+        `;
+        loader.style.display = "none";
+        document.querySelector(".review-form-card").appendChild(loader);
+
+        aiButton.addEventListener("click", async function () {
+            const rate = rateInput.value;
+            if (!rate) {
+                alert("Моля, въведи оценка.");
+                return;
+            }
 
             const description = `Филм с оценка ${rate}`;
+
+            // ⏳ Показваме анимацията
+            loader.style.display = "block";
+            aiButton.disabled = true;
+            aiButton.innerText = "🤔 Генерирам...";
 
             try {
                 const response = await fetch('/Reviews/Generate', {
@@ -142,14 +273,19 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    document.getElementById("commentInput").value = data.comment;
-                    document.getElementById("toneInput").value = data.emotion;
-                    document.getElementById("rateInput").value = data.rate;
+                    commentInput.value = data.comment;
+                    toneInput.value = data.emotion;
+                    rateInput.value = data.rate;
                 } else {
-                    alert("Грешка при свързване с AI.");
+                    alert("⚠️ Грешка при свързване с AI.");
                 }
             } catch (error) {
-                alert("Възникна грешка: " + error);
+                alert("❌ Възникна грешка: " + error);
+            } finally {
+                // ✅ Скриваме анимацията
+                loader.style.display = "none";
+                aiButton.disabled = false;
+                aiButton.innerText = "🤖 Генерирай с AI";
             }
         });
     </script>
