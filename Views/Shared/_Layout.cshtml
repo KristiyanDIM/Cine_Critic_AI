@@ -98,29 +98,48 @@
 
             const userId = @((HttpContextAccessor.HttpContext.Session.GetInt32("UserId") ?? 0));
 
-            function sendMessage() {
-                const msg = chatInput.value.trim();
-                if (!msg) return;
+                    function sendMessage() {
+            const msg = chatInput.value.trim();
+            if (!msg) return;
 
-                chatMessages.innerHTML += `<div class="user-message">${msg}</div>`;
-                chatInput.value = "";
+            // Добавяме съобщението на потребителя
+            chatMessages.innerHTML += `<div class="user-message">${msg}</div>`;
+            chatInput.value = "";
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // 👉 Добавяме loader (анимация "мисли...")
+            const loaderDiv = document.createElement("div");
+            loaderDiv.className = "bot-message";
+            loaderDiv.innerHTML = `
+                <div class="loader-container">
+                    <div class="loader-dot"></div>
+                </div>
+            `;
+            chatMessages.appendChild(loaderDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Изпращаме заявката към контролера
+            fetch('@Url.Action("SendMessage", "ChatBot")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `userMessage=${encodeURIComponent(msg)}&userId=${userId}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Махаме loader-а
+                loaderDiv.remove();
+
+                // Показваме отговора
+                chatMessages.innerHTML += `<div class="bot-message">${data.response}</div>`;
                 chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch(err => {
+                loaderDiv.remove();
+                chatMessages.innerHTML += `<div class="bot-message text-danger">⚠️ Грешка: ${err}</div>`;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
 
-                fetch('@Url.Action("SendMessage", "ChatBot")', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `userMessage=${encodeURIComponent(msg)}&userId=${userId}`
-                })
-                .then(res => res.json())
-                .then(data => {
-                    chatMessages.innerHTML += `<div class="bot-message">${data.response}</div>`;
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                })
-                .catch(err => {
-                    chatMessages.innerHTML += `<div class="bot-message text-danger">⚠️ Грешка: ${err}</div>`;
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                });
-            }
 
             chatBtn.addEventListener("click", () => chatWindow.classList.toggle("hidden"));
             chatClose.addEventListener("click", () => chatWindow.classList.add("hidden"));

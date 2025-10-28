@@ -535,3 +535,53 @@ h3.fw-bold {
     color: white;
     align-self: flex-end;
 }
+
+/* Loader animation while bot is thinking */
+.loader-container {
+    --uib-size: 30px;
+    --uib-color: #6c757d;
+    --uib-speed: 1.3s;
+    --uib-dot-size: calc(var(--uib-size) * 0.24);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--uib-dot-size);
+    width: var(--uib-size);
+    margin: 6px 10px;
+}
+
+    .loader-dot,
+    .loader-container::before,
+    .loader-container::after {
+        content: '';
+        display: block;
+        height: var(--uib-dot-size);
+        width: var(--uib-dot-size);
+        border-radius: 50%;
+        background-color: var(--uib-color);
+        transform: scale(0);
+        transition: background-color 0.3s ease;
+    }
+
+    .loader-container::before {
+        animation: loaderPulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.375) infinite;
+    }
+
+.loader-dot {
+    animation: loaderPulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.25) infinite both;
+}
+
+.loader-container::after {
+    animation: loaderPulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.125) infinite;
+}
+
+@keyframes loaderPulse {
+    0%, 100% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1);
+    }
+}

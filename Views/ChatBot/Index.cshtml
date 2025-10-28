@@ -114,6 +114,59 @@
             border-radius: 10px;
             padding: 10px 40px;
         }
+
+
+    .loader-container {
+        --uib-size: 43px;
+        --uib-color: #555;
+        --uib-speed: 1.3s;
+        --uib-dot-size: calc(var(--uib-size) * 0.24);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: var(--uib-dot-size);
+        width: var(--uib-size);
+        margin: 10px 0;
+    }
+
+        .loader-dot,
+        .loader-container::before,
+        .loader-container::after {
+            content: '';
+            display: block;
+            height: var(--uib-dot-size);
+            width: var(--uib-dot-size);
+            border-radius: 50%;
+            background-color: var(--uib-color);
+            transform: scale(0);
+            transition: background-color 0.3s ease;
+        }
+
+        .loader-container::before {
+            animation: loaderPulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.375) infinite;
+        }
+
+    .loader-dot {
+        animation: loaderPulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.25) infinite both;
+    }
+
+    .loader-container::after {
+        animation: loaderPulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.125) infinite;
+    }
+
+    @@keyframes loaderPulse {
+        0%, 100%
+
+    {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1);
+    }
+
+    }
 </style>
 
 @section Scripts {
@@ -124,7 +177,7 @@
         const chatBox = document.getElementById("chat-box");
         const clearBtn = document.getElementById("clearChatBtn");
 
-        if(form){
+                if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
                 const message = input.value.trim();
@@ -136,6 +189,17 @@
                 chatBox.appendChild(userDiv);
                 input.value = "";
 
+                // 👉 Добавяме loader (анимация докато мисли)
+                const loaderDiv = document.createElement("div");
+                loaderDiv.className = "bot-message";
+                loaderDiv.innerHTML = `
+                    <div class="loader-container">
+                        <div class="loader-dot"></div>
+                    </div>
+                `;
+                chatBox.appendChild(loaderDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
                 try {
                     const res = await fetch('@Url.Action("SendMessage", "ChatBot")', {
                         method: 'POST',
@@ -144,12 +208,18 @@
                     });
 
                     const data = await res.json();
+
+                    // 👉 Махаме loader-а и показваме отговора
+                    loaderDiv.remove();
+
                     const botDiv = document.createElement("div");
                     botDiv.className = "bot-message";
                     botDiv.textContent = data.response;
                     chatBox.appendChild(botDiv);
                     chatBox.scrollTop = chatBox.scrollHeight;
                 } catch {
+                    loaderDiv.remove();
+
                     const errorDiv = document.createElement("div");
                     errorDiv.className = "bot-message";
                     errorDiv.textContent = "⚠️ Грешка при свързване с AI.";
@@ -158,6 +228,7 @@
                 }
             });
         }
+
 
         if(clearBtn){
             clearBtn.addEventListener("click", async () => {
